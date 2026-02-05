@@ -13,11 +13,17 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    Entities/Event.cpp
+    Entities/Event.cpp \
+    Entities/Participant.cpp \
+    Entities/Receipt.cpp \
+    Entities/ReceiptItem.cpp
 
 HEADERS += \
     Domain_global.h \
-    Entities/Event.h
+    Entities/Event.h \
+    Entities/Participant.h \
+    Entities/Receipt.h \
+    Entities/ReceiptItem.h
 
 # Default rules for deployment.
 unix {

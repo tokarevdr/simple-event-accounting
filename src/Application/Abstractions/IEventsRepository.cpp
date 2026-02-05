@@ -1,9 +1,9 @@
-#include "ReadEventsInfoRequest.h"
+#include "IEventsRepository.h"
 
 namespace Sea {
 namespace Application {
 
-ReadEventsInfoRequest::ReadEventsInfoRequest() {}
+IEventsRepository::IEventsRepository() {}
 
 } // namespace Application
 } // namespace Sea

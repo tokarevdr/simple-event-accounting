@@ -5,3 +5,6 @@ SUBDIRS += \
     src/Domain \
     src/Infrastructure \
     src/Presentation
+
+Application.depends = src/Domain
+Infrastructure.depends = src/Application

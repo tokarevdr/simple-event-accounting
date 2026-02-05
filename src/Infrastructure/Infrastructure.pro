@@ -24,3 +24,15 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Application/ -lApplication
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Application/ -lApplicationd
+
+INCLUDEPATH += $$PWD/../Application
+DEPENDPATH += $$PWD/../Application
+
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/ -lDomain
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domainn/ -lDomaind
+
+INCLUDEPATH += $$PWD/../Domain
+DEPENDPATH += $$PWD/../Domain

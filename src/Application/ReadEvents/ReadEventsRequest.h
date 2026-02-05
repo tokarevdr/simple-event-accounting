@@ -2,14 +2,16 @@
 #define READEVENTSINFOREQUEST_H
 
 #include "Application_global.h"
+#include "ReadEventsResponse.h"
+#include "mediqt/irequest.h"
 
 namespace Sea {
 namespace Application {
 
-class APPLICATION_EXPORT ReadEventsInfoRequest
+class APPLICATION_EXPORT ReadEventsRequest : public Mediqt::IRequest<ReadEventsResponse>
 {
 public:
-    ReadEventsInfoRequest();
+    ReadEventsRequest();
 };
 
 } // namespace Application
