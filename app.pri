@@ -1,0 +1,1 @@
+DESTDIR = $$OUT_PWD/bin
