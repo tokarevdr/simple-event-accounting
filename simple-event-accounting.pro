@@ -7,4 +7,5 @@ SUBDIRS += \
     src/Presentation
 
 Application.depends = src/Domain
-Infrastructure.depends = src/Application
+Infrastructure.depends = src/Application src/Domain
+Presentation.depends = src/Application src/Infrastructure src/Domain

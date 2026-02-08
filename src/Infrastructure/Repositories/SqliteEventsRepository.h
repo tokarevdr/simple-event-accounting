@@ -13,8 +13,10 @@ public:
     SqliteEventsRepository();
 
     // IEventsRepository interface
-    QVector<Domain::Event> readEvents() const override;
     qint32 createEvent(const Domain::Event &event) override;
+    QVector<Domain::Event> readEvents() const override;
+    bool updateEvent(const Domain::Event &event) override;
+    bool deleteEvent(int id) override;
 };
 
 } // namespace Infrastructure

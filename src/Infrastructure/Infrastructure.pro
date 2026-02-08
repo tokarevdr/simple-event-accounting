@@ -1,4 +1,5 @@
 QT -= gui
+QT += sql
 
 TEMPLATE = lib
 DEFINES += INFRASTRUCTURE_LIBRARY
@@ -25,14 +26,14 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Application/ -lApplication
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Application/ -lApplicationd
-
-INCLUDEPATH += $$PWD/../Application
-DEPENDPATH += $$PWD/../Application
-
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/ -lDomain
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domainn/ -lDomaind
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
 
 INCLUDEPATH += $$PWD/../Domain
 DEPENDPATH += $$PWD/../Domain
+
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplication
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplicationd
+
+INCLUDEPATH += $$PWD/../Application
+DEPENDPATH += $$PWD/../Application

@@ -43,8 +43,8 @@ CONFIG(debug, debug|release): LIBS += -L$$ELPRIB_LIB_PATH -lmediqtd
 INCLUDEPATH += $$ELPRIB_INCLUDE_PATH
 DEPENDPATH += $$ELPRIB_INCLUDE_PATH
 
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/ -lDomain
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domain/ -lDomaind
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
 
 INCLUDEPATH += $$PWD/../Domain
 DEPENDPATH += $$PWD/../Domain

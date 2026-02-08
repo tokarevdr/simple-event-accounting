@@ -1,7 +1,9 @@
-QT += quick
+QT += quick sql
 
 include(../../common.pri)
-include(../../lib.pri)
+include(../../app.pri)
+
+CONFIG += c++17
 
 SOURCES += \
         main.cpp
@@ -18,3 +20,21 @@ QML_DESIGNER_IMPORT_PATH =
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
+
+INCLUDEPATH += $$PWD/../Domain
+DEPENDPATH += $$PWD/../Domain
+
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplication
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplicationd
+
+INCLUDEPATH += $$PWD/../Application
+DEPENDPATH += $$PWD/../Application
+
+CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructure
+CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructured
+
+INCLUDEPATH += $$PWD/../Infrastructure
+DEPENDPATH += $$PWD/../Infrastructure
