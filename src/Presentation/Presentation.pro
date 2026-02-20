@@ -1,11 +1,17 @@
-QT += quick sql
+QT += quick sql concurrent
 
 include(../../common.pri)
 include(../../app.pri)
 
 CONFIG += c++17
 
+HEADERS += \
+    Utils/AsyncExecutor.h \
+    ViewModels/EventsViewModel.h
+
 SOURCES += \
+        Utils/AsyncExecutor.cpp \
+        ViewModels/EventsViewModel.cpp \
         main.cpp
 
 RESOURCES += qml.qrc
@@ -21,20 +27,23 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
+CONFIG(release, debug|release) {
+    LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
+    LIBS += -L$$OUT_PWD/../Application/lib -lApplication
+    LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructure
+}
+CONFIG(debug, debug|release) {
+    LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
+    LIBS += -L$$OUT_PWD/../Application/lib -lApplicationd
+    LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructured
+}
 
-INCLUDEPATH += $$PWD/../Domain
-DEPENDPATH += $$PWD/../Domain
+INCLUDEPATH += \
+    $$PWD/../Domain \
+    $$PWD/../Application \
+    $$PWD/../Infrastructure
 
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplication
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplicationd
-
-INCLUDEPATH += $$PWD/../Application
-DEPENDPATH += $$PWD/../Application
-
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructure
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructured
-
-INCLUDEPATH += $$PWD/../Infrastructure
-DEPENDPATH += $$PWD/../Infrastructure
+DEPENDPATH += \
+    $$PWD/../Domain \
+    $$PWD/../Application \
+    $$PWD/../Infrastructure

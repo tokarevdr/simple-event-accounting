@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>Views/EventsList.qml</file>
+        <file>Views/EventDialog.qml</file>
     </qresource>
 </RCC>

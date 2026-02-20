@@ -8,7 +8,14 @@ namespace Infrastructure {
 
 SqliteEventsRepository::SqliteEventsRepository()
 {
-    QSqlQuery query;
+    m_db = QSqlDatabase::addDatabase("QSQLITE", "events");
+    m_db.setHostName("sea");
+    m_db.setDatabaseName("events");
+    m_db.setUserName("drunkdwarf");
+    m_db.setPassword("6$mAkEbEeRnOtWaR6$");
+    m_db.open();
+
+    QSqlQuery query(m_db);
 
     query.exec(R"(CREATE TABLE IF NOT EXISTS events (
                     event_id INTEGER,
@@ -21,7 +28,7 @@ SqliteEventsRepository::SqliteEventsRepository()
 
 qint32 SqliteEventsRepository::createEvent(const Domain::Event &event)
 {
-    QSqlQuery query;
+    QSqlQuery query(m_db);
 
     query.prepare(R"(INSERT INTO events (title, start_date, end_date)
                      VALUES (:title, :start_date, :end_date))");
@@ -40,7 +47,7 @@ qint32 SqliteEventsRepository::createEvent(const Domain::Event &event)
 QVector<Domain::Event> SqliteEventsRepository::readEvents() const
 {
     QVector<Domain::Event> events;
-    QSqlQuery query;
+    QSqlQuery query(m_db);
 
     query.exec(R"(SELECT * FROM events)");
 
@@ -67,7 +74,7 @@ QVector<Domain::Event> SqliteEventsRepository::readEvents() const
 
 bool SqliteEventsRepository::updateEvent(const Domain::Event &event)
 {
-    QSqlQuery query;
+    QSqlQuery query(m_db);
 
     query.prepare(
         R"(UPDATE events SET title = :title, start_date = :start_date, end_date = :end_date WHERE event_id = :event_id)");
@@ -85,7 +92,7 @@ bool SqliteEventsRepository::updateEvent(const Domain::Event &event)
 
 bool SqliteEventsRepository::deleteEvent(int id)
 {
-    QSqlQuery query;
+    QSqlQuery query(m_db);
 
     query.prepare(R"(DELETE FROM events WHERE event_id = :event_id)");
     query.bindValue(":event_id", id);

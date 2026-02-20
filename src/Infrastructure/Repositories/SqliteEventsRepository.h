@@ -1,6 +1,8 @@
 #ifndef SQLITEEVENTSREPOSITORY_H
 #define SQLITEEVENTSREPOSITORY_H
 
+#include <QSqlDatabase>
+
 #include "Abstractions/IEventsRepository.h"
 #include "Infrastructure_global.h"
 
@@ -17,6 +19,9 @@ public:
     QVector<Domain::Event> readEvents() const override;
     bool updateEvent(const Domain::Event &event) override;
     bool deleteEvent(int id) override;
+
+private:
+    QSqlDatabase m_db;
 };
 
 } // namespace Infrastructure
