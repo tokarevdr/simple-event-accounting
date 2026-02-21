@@ -2,12 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import "Controls"
+
 Dialog {
     id: root
 
     property alias eventTitle: titleTextField.text
-    property alias eventStartDate: startDateTextField.text
-    property alias eventEndDate: endDateTextField.text
+    property alias eventStartDate: startDatePicker.selectedDate
+    property alias eventEndDate: endDatePicker.selectedDate
 
     standardButtons: Dialog.Ok | Dialog.Cancel
 
@@ -39,13 +41,11 @@ Dialog {
             text: "Начало:"
         }
 
-        TextField {
-            id: startDateTextField
+        DatePicker {
+            id: startDatePicker
 
             Layout.fillHeight: true
             Layout.fillWidth: true
-
-            placeholderText: "01.01.2007"
         }
 
         Label {
@@ -55,19 +55,19 @@ Dialog {
             text: "Конец:"
         }
 
-        TextField {
-            id: endDateTextField
+        DatePicker {
+            id: endDatePicker
 
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            placeholderText: "01.01.2007"
+            minimumDate: startDatePicker.selectedDate
         }
     }
 
     function clear() {
         titleTextField.text = ""
-        startDateTextField.text = ""
-        endDateTextField.text = ""
+        startDatePicker.selectedDate = new Date()
+        endDatePicker.selectedDate = new Date()
     }
 }

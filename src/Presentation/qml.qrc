@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>Views/EventsList.qml</file>
         <file>Views/EventDialog.qml</file>
+        <file>Views/Controls/DatePicker.qml</file>
     </qresource>
 </RCC>

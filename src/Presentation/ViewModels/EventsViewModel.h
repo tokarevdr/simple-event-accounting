@@ -28,22 +28,19 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE void createEvent(const QString &title,
-                                 const QString &startDate,
-                                 const QString &endDate);
+    Q_INVOKABLE void createEvent(const QString &title, const QDate &startDate, const QDate &endDate);
 
-    Q_INVOKABLE void updateEvent(qint32 id,
+    Q_INVOKABLE void updateEvent(int index,
                                  const QString &title,
-                                 const QString &startDate,
-                                 const QString &endDate);
+                                 const QDate &startDate,
+                                 const QDate &endDate);
 
-    Q_INVOKABLE void deleteEvent(qint32 id);
+    Q_INVOKABLE void deleteEvent(int index);
 
 private:
     AsyncExecutor &m_executor;
     QVector<Domain::Event> m_events;
     Application::IEventsRepository &m_repository;
-    const QString DATE_FORMAT = "dd.MM.yyyy";
 };
 
 } // namespace Presentation

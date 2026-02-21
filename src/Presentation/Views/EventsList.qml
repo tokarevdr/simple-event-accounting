@@ -6,6 +6,9 @@ Item {
     id: root
 
     property var eventsViewModel: null
+    property var formatDate: function (date) {
+        return Qt.formatDate(date, "dd.MM.yyyy")
+    }
 
     ColumnLayout {
         anchors.fill: root
@@ -28,8 +31,8 @@ Item {
             model: eventsViewModel
 
             delegate: Item {
-                height: 50
-                width: 200
+                height: eventsListView.height / 10
+                width: eventsListView.width
                 RowLayout {
                     anchors.fill: parent
 
@@ -44,15 +47,53 @@ Item {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
 
-                        text: startDateRole
+                        text: root.formatDate(startDateRole)
                     }
 
                     Text {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
 
-                        text: endDateRole
+                        text: root.formatDate(endDateRole)
                     }
+
+                    Button {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 30
+
+                        text: "..."
+
+                        onClicked: eventMenu.open()
+                    }
+                }
+
+                Menu {
+                    id: eventMenu
+
+                    MenuItem {
+                        text: "Edit"
+
+                        onTriggered: {
+                            editEventDialog.eventTitle = titleRole
+                            editEventDialog.eventStartDate = startDateRole
+                            editEventDialog.eventEndDate = endDateRole
+                            editEventDialog.open()
+                        }
+                    }
+
+                    MenuItem {
+                        text: "Delete"
+
+                        onTriggered: eventsViewModel.deleteEvent(index)
+                    }
+                }
+
+                EventDialog {
+                    id: editEventDialog
+
+                    onAccepted: eventsViewModel.updateEvent(index, eventTitle,
+                                                            eventStartDate,
+                                                            eventEndDate)
                 }
             }
         }

@@ -44,11 +44,9 @@ QVariant EventsViewModel::data(
         case TitleRole:
             return event.title();
         case StartDateRole:
-            return event.startDate().has_value() ? event.startDate().value().toString(DATE_FORMAT)
-                                                 : "~";
+            return event.startDate().has_value() ? event.startDate().value() : QDate();
         case EndDateRole:
-            return event.endDate().has_value() ? event.endDate().value().toString(DATE_FORMAT)
-                                               : "~";
+            return event.endDate().has_value() ? event.endDate().value() : QDate();
         default:
             return QVariant();
     }
@@ -66,38 +64,32 @@ QHash<int, QByteArray> EventsViewModel::roleNames() const
     return names;
 }
 
-void EventsViewModel::createEvent(const QString &title,
-                                  const QString &startDate,
-                                  const QString &endDate)
+void EventsViewModel::createEvent(const QString &title, const QDate &startDate, const QDate &endDate)
 {
     if (title.isEmpty()) {
         qDebug() << "Title should not be empty.";
         return;
     }
 
-    QDate start = QDate::fromString(startDate, DATE_FORMAT);
-
-    if (!start.isValid()) {
+    if (!startDate.isValid()) {
         qDebug() << "Start date is invalid.";
         return;
     }
 
-    QDate end = QDate::fromString(endDate, DATE_FORMAT);
-
-    if (!end.isValid()) {
+    if (!endDate.isValid()) {
         qDebug() << "End date is invalid.";
         return;
     }
 
-    if (end < start) {
+    if (endDate < startDate) {
         qDebug() << "Start date should be earlier than end date.";
         return;
     }
 
     Domain::Event event;
     event.setTitle(title);
-    event.setStartDate(start);
-    event.setEndDate(end);
+    event.setStartDate(startDate);
+    event.setEndDate(endDate);
 
     m_executor.exec<qint32>([this, event]() { return m_repository.createEvent(event); },
                             [this, &event](const qint32 &id) {
@@ -109,13 +101,66 @@ void EventsViewModel::createEvent(const QString &title,
                             });
 }
 
-void EventsViewModel::updateEvent(qint32 id,
+void EventsViewModel::updateEvent(int index,
                                   const QString &title,
-                                  const QString &startDate,
-                                  const QString &endDate)
-{}
+                                  const QDate &startDate,
+                                  const QDate &endDate)
+{
+    if (title.isEmpty()) {
+        qDebug() << "Title should not be empty.";
+        return;
+    }
 
-void EventsViewModel::deleteEvent(qint32 id) {}
+    if (!startDate.isValid()) {
+        qDebug() << "Start date is invalid.";
+        return;
+    }
+
+    if (!endDate.isValid()) {
+        qDebug() << "End date is invalid.";
+        return;
+    }
+
+    if (endDate < startDate) {
+        qDebug() << "Start date should be earlier than end date.";
+        return;
+    }
+
+    Domain::Event event = m_events.at(index);
+    event.setTitle(title);
+    event.setStartDate(startDate);
+    event.setEndDate(endDate);
+
+    m_executor.exec<bool>([this, event]() { return m_repository.updateEvent(event); },
+                          [this, &event, index](const bool &isOk) {
+                              if (!isOk) {
+                                  qDebug() << "Event was not updated.";
+                                  return;
+                              }
+
+                              QModelIndex modelIndex = QAbstractListModel::index(index);
+
+                              m_events.replace(index, event);
+                              dataChanged(modelIndex, modelIndex);
+                          });
+}
+
+void EventsViewModel::deleteEvent(int index)
+{
+    qint32 id = m_events.at(index).id();
+
+    m_executor.exec<bool>([this, id]() { return m_repository.deleteEvent(id); },
+                          [this, index](const bool &isOk) {
+                              if (!isOk) {
+                                  qDebug() << "Event was not deleted.";
+                                  return;
+                              }
+
+                              beginRemoveRows(QModelIndex(), index, index);
+                              m_events.removeAt(index);
+                              endRemoveRows();
+                          });
+}
 
 } // namespace Presentation
 } // namespace Sea
