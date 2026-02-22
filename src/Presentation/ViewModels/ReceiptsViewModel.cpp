@@ -59,6 +59,8 @@ QHash<int, QByteArray> ReceiptsViewModel::roleNames() const
 
 void ReceiptsViewModel::setEventId(qint32 id)
 {
+    m_eventId = id;
+
     if (id == -1) {
         beginResetModel();
         m_receipts.clear();
@@ -105,10 +107,13 @@ void ReceiptsViewModel::createReceipt(const QString &title,
     receipt.setTitle(title);
     receipt.setPurchaseDateTime(QDateTime(purchaseDate, purchaseTime));
 
-    Domain::Participant buyer;
-    buyer.setId(buyerId);
-
-    receipt.setBuyer(buyer);
+    if (buyerId == -1) {
+        receipt.setBuyer(std::nullopt);
+    } else {
+        Domain::Participant buyer;
+        buyer.setId(buyerId);
+        receipt.setBuyer(buyer);
+    }
 
     m_executor.exec<qint32>([this, receipt]() { return m_repository.createReceipt(receipt); },
                             [this, &receipt](const qint32 &id) {

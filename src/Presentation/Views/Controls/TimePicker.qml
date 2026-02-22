@@ -2,17 +2,23 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-Item {
+Control {
     id: root
 
     property date selectedTime: new Date()
 
+    implicitHeight: 50
+    implicitWidth: 400
+
     Frame {
         id: frame
         anchors.fill: root
+        anchors.margins: root.padding
 
         RowLayout {
             id: row
+
+            anchors.fill: parent
 
             SpinBox {
                 id: hoursSpinBox

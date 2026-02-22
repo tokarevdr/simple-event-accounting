@@ -123,7 +123,7 @@ Item {
     ReceiptDialog {
         id: createReceiptDialog
 
-        onAccepted: receiptsViewModel.createEvent(eventTitle, eventStartDate,
-                                                  eventEndDate)
+        onAccepted: receiptsViewModel.createReceipt(receiptTitle, purchaseDate,
+                                                    purchaseTime, -1)
     }
 }

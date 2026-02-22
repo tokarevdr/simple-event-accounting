@@ -1,5 +1,7 @@
 #include "SqliteEventsRepository.h"
 
+#include <QDebug>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>
 
@@ -17,32 +19,43 @@ SqliteEventsRepository::SqliteEventsRepository()
 
     QSqlQuery query(m_db);
 
-    // PRAGMA foreign_keys = ON; ???
+    if (!query.exec("PRAGMA foreign_keys = ON;")) {
+        qDebug() << query.lastError().text();
+    }
 
-    query.exec(R"(CREATE TABLE IF NOT EXISTS events (
+    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS events (
                     event_id INTEGER,
                     title TEXT NOT NULL,
                     start_date TEXT,
                     end_date TEXT,
                     PRIMARY KEY(event_id AUTOINCREMENT))
-                )");
+                )")) {
+        qDebug() << "Events table was not created.";
+        qDebug() << query.lastError().text();
+    }
 
-    query.exec(R"(CREATE TABLE IF NOT EXISTS participants (
+    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS participants (
                     participant_id INTEGER,
                     name TEXT NOT NULL,
                     PRIMARY KEY(participant_id AUTOINCREMENT))
-                )");
+                )")) {
+        qDebug() << "Participants table was not created.";
+        qDebug() << query.lastError().text();
+    }
 
-    query.exec(R"(CREATE TABLE IF NOT EXISTS receipts (
+    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS receipts (
                     receipt_id INTEGER,
                     event_id INTEGER,
-                    participant_id INTEGER,
+                    buyer_id INTEGER,
                     title TEXT NOT NULL,
                     purchase_datetime INTEGER NOT NULL,
-                    PRIMARY KEY(receipt_id AUTOINCREMENT))
+                    PRIMARY KEY (receipt_id AUTOINCREMENT)
                     FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
-                    FOREIGN KEY (participant_id) REFERENCES participants(participant_id) ON DELETE SET NULL
-                )");
+                    FOREIGN KEY (buyer_id) REFERENCES participants(participant_id) ON DELETE SET NULL)
+                )")) {
+        qDebug() << "Receipts table was not created.";
+        qDebug() << query.lastError().text();
+    }
 }
 
 qint32 SqliteEventsRepository::createEvent(const Domain::Event &event)
@@ -123,14 +136,17 @@ qint32 SqliteEventsRepository::createReceipt(const Domain::Receipt &receipt)
 {
     QSqlQuery query(m_db);
 
-    query.prepare(R"(INSERT INTO receipts (event_id, participant_id, title, purchase_datetime)
-                     VALUES (:event_id, :participant_id, :title, :purchase_datetime))");
+    query.prepare(R"(INSERT INTO receipts (event_id, buyer_id, title, purchase_datetime)
+                     VALUES (:event_id, :buyer_id, :title, :purchase_datetime))");
     query.bindValue(":event_id", receipt.eventId());
-    query.bindValue(":participant_id",
+    query.bindValue(":buyer_id",
                     receipt.buyer().has_value() ? receipt.buyer().value().id() : QVariant());
     query.bindValue(":title", receipt.title());
     query.bindValue(":purchase_datetime", receipt.purchaseDateTime().toSecsSinceEpoch());
-    query.exec();
+
+    if (!query.exec()) {
+        qDebug() << query.lastError().text();
+    }
 
     return query.lastInsertId().toInt();
 }
@@ -142,11 +158,15 @@ QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId) co
 
     query.prepare(
         R"(SELECT r.receipt_id, r.event_id, r.title, r.purchase_datetime, p.participant_id, p.name
-            FROM receipts r WHERE R.event_id = :event_id
-            JOIN participants p ON r.participant_id = p.participant_id
-            OREDER BY r.purchase_datetime DESC)");
+            FROM receipts as r
+            LEFT JOIN participants AS p ON r.buyer_id = p.participant_id
+            WHERE r.event_id = :event_id
+            ORDER BY r.purchase_datetime DESC)");
     query.bindValue(":event_id", eventId);
-    query.exec();
+
+    if (!query.exec()) {
+        qDebug() << query.lastError().text();
+    }
 
     while (query.next()) {
         Domain::Receipt receipt;
@@ -155,11 +175,14 @@ QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId) co
         receipt.setTitle(query.value(2).toString());
         receipt.setPurchaseDateTime(QDateTime::fromSecsSinceEpoch(query.value(3).toLongLong()));
 
-        Domain::Participant participant;
-        participant.setId(query.value(4).toInt());
-        participant.setName(query.value(5).toString());
-
-        receipt.setBuyer(participant);
+        if (query.value(4).isValid()) {
+            Domain::Participant participant;
+            participant.setId(query.value(4).toInt());
+            participant.setName(query.value(5).toString());
+            receipt.setBuyer(participant);
+        } else {
+            receipt.setBuyer(std::nullopt);
+        }
 
         receipts.append(receipt);
     }

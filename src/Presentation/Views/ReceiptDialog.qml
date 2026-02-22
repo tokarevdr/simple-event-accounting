@@ -31,7 +31,7 @@ Dialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            placeholderText: "Бухич"
+            placeholderText: "Пятерочка"
         }
 
         Label {

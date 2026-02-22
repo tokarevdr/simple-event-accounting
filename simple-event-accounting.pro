@@ -1,11 +1,16 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    src/Application \
-    src/Domain \
-    src/Infrastructure \
-    src/Presentation
+    Application \
+    Domain \
+    Infrastructure \
+    Presentation
 
-Application.depends = src/Domain
-Infrastructure.depends = src/Application src/Domain
-Presentation.depends = src/Application src/Infrastructure src/Domain
+Domain.subdir = src/Domain
+Application.subdir = src/Application
+Infrastructure.subdir = src/Infrastructure
+Presentation.subdir = src/Presentation
+
+Application.depends = Domain
+Infrastructure.depends = Domain Application
+Presentation.depends = Domain Application Infrastructure
