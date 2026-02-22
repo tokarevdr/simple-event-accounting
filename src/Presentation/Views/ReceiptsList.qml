@@ -5,11 +5,13 @@ import QtQuick.Layouts 1.15
 Item {
     id: root
 
-    property var eventsViewModel: null
+    property var receiptsViewModel: null
     property var formatDate: function (date) {
         return Qt.formatDate(date, "dd.MM.yyyy")
     }
-    signal eventClicked(int eventId)
+    property var formatTime: function (date) {
+        return Qt.formatTime(date, "hh:mm:ss")
+    }
 
     ColumnLayout {
         anchors.fill: root
@@ -20,20 +22,20 @@ Item {
 
             text: "Create"
 
-            onClicked: createEventDialog.open()
+            onClicked: createReceiptDialog.open()
         }
 
         ListView {
-            id: eventsListView
+            id: receiptsListView
 
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: eventsViewModel
+            model: receiptsViewModel
 
             delegate: Item {
-                height: eventsListView.height / 10
-                width: eventsListView.width
+                height: receiptsListView.height / 10
+                width: receiptsListView.width
                 RowLayout {
                     anchors.fill: parent
 
@@ -55,7 +57,7 @@ Item {
                         Text {
                             anchors.fill: parent
 
-                            text: root.formatDate(startDateRole)
+                            text: root.formatDate(purchaseDateRole)
                         }
                     }
 
@@ -66,7 +68,7 @@ Item {
                         Text {
                             anchors.fill: parent
 
-                            text: root.formatDate(endDateRole)
+                            text: root.formatTime(purchaseTimeRole)
                         }
                     }
 
@@ -79,53 +81,49 @@ Item {
 
                             text: "..."
 
-                            onClicked: eventMenu.open()
+                            onClicked: receiptsMenu.open()
                         }
                     }
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-
-                    onClicked: root.eventClicked(idRole)
-                }
-
                 Menu {
-                    id: eventMenu
+                    id: receiptsMenu
 
                     MenuItem {
                         text: "Edit"
 
                         onTriggered: {
-                            editEventDialog.eventTitle = titleRole
-                            editEventDialog.eventStartDate = startDateRole
-                            editEventDialog.eventEndDate = endDateRole
-                            editEventDialog.open()
+                            editReceiptDialog.receiptTitle = titleRole
+                            editReceiptDialog.purchaseDate = purchaseDateRole
+                            editReceiptDialog.purchaseTime = purchaseTimeRole
+                            editReceiptDialog.open()
                         }
                     }
 
                     MenuItem {
                         text: "Delete"
 
-                        onTriggered: eventsViewModel.deleteEvent(index)
+                        onTriggered: receiptsViewModel.deleteReceipt(index)
                     }
                 }
 
-                EventDialog {
-                    id: editEventDialog
+                ReceiptDialog {
+                    id: editReceiptDialog
 
-                    onAccepted: eventsViewModel.updateEvent(index, eventTitle,
-                                                            eventStartDate,
-                                                            eventEndDate)
+                    onAccepted: receiptsViewModel.updateReceipt(index,
+                                                                receiptTitle,
+                                                                purchaseDate,
+                                                                purchaseTime,
+                                                                -1)
                 }
             }
         }
     }
 
-    EventDialog {
-        id: createEventDialog
+    ReceiptDialog {
+        id: createReceiptDialog
 
-        onAccepted: eventsViewModel.createEvent(eventTitle, eventStartDate,
-                                                eventEndDate)
+        onAccepted: receiptsViewModel.createEvent(eventTitle, eventStartDate,
+                                                  eventEndDate)
     }
 }

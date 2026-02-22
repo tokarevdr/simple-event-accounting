@@ -23,7 +23,7 @@ public:
 
     virtual bool updateEvent(const Domain::Event &event) = 0;
 
-    virtual bool deleteEvent(int id) = 0;
+    virtual bool deleteEvent(qint32 id) = 0;
 };
 
 } // namespace Application

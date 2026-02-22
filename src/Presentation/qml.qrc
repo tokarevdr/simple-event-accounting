@@ -4,5 +4,10 @@
         <file>Views/EventsList.qml</file>
         <file>Views/EventDialog.qml</file>
         <file>Views/Controls/DatePicker.qml</file>
+        <file>Views/ParticipantsList.qml</file>
+        <file>Views/ParticipantDialog.qml</file>
+        <file>Views/ReceiptDialog.qml</file>
+        <file>Views/Controls/TimePicker.qml</file>
+        <file>Views/ReceiptsList.qml</file>
     </qresource>
 </RCC>

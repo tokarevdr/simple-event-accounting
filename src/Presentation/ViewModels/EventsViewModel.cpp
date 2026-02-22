@@ -126,7 +126,7 @@ void EventsViewModel::updateEvent(int index,
         return;
     }
 
-    Domain::Event event = m_events.at(index);
+    Domain::Event event = m_events[index];
     event.setTitle(title);
     event.setStartDate(startDate);
     event.setEndDate(endDate);
@@ -147,7 +147,7 @@ void EventsViewModel::updateEvent(int index,
 
 void EventsViewModel::deleteEvent(int index)
 {
-    qint32 id = m_events.at(index).id();
+    qint32 id = m_events[index].id();
 
     m_executor.exec<bool>([this, id]() { return m_repository.deleteEvent(id); },
                           [this, index](const bool &isOk) {

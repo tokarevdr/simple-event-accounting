@@ -7,9 +7,9 @@ import "Controls"
 Dialog {
     id: root
 
-    property alias eventTitle: titleTextField.text
-    property alias eventStartDate: startDatePicker.selectedDate
-    property alias eventEndDate: endDatePicker.selectedDate
+    property alias receiptTitle: titleTextField.text
+    property alias purchaseDate: purchaseDatePicker.selectedDate
+    property alias purchaseTime: purchaseTimePicker.selectedTime
 
     standardButtons: Dialog.Ok | Dialog.Cancel
 
@@ -38,11 +38,11 @@ Dialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            text: "Начало:"
+            text: "Дата покупки:"
         }
 
         DatePicker {
-            id: startDatePicker
+            id: purchaseDatePicker
 
             Layout.fillHeight: true
             Layout.fillWidth: true
@@ -52,23 +52,21 @@ Dialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            text: "Конец:"
+            text: "Время покупки:"
         }
 
-        DatePicker {
-            id: endDatePicker
+        TimePicker {
+            id: purchaseTimePicker
 
             Layout.fillHeight: true
             Layout.fillWidth: true
-
-            minimumDate: startDatePicker.selectedDate
         }
     }
 
     function clear() {
         titleTextField.text = ""
-        startDatePicker.selectedDate = new Date()
-        endDatePicker.selectedDate = new Date()
+        purchaseDatePicker.selectedDate = new Date()
+        purchaseTimePicker.selectedTime = new Date()
     }
 
     enter: Transition {

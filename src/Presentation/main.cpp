@@ -5,6 +5,8 @@
 
 #include "Repositories/SqliteEventsRepository.h"
 #include "ViewModels/EventsViewModel.h"
+#include "ViewModels/ParticipantsViewModel.h"
+#include "ViewModels/ReceiptsViewModel.h"
 
 int main(
     int argc, char *argv[])
@@ -17,10 +19,14 @@ int main(
     Sea::Infrastructure::SqliteEventsRepository repo;
     Sea::Presentation::AsyncExecutor asyncExecutor;
     Sea::Presentation::EventsViewModel eventsViewModel(asyncExecutor, repo);
+    Sea::Presentation::ParticipantsViewModel participantsViewModel(asyncExecutor, repo);
+    Sea::Presentation::ReceiptsViewModel receiptsViewModel(asyncExecutor, repo);
 
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("eventsVm", &eventsViewModel);
+    engine.rootContext()->setContextProperty("participantsVm", &participantsViewModel);
+    engine.rootContext()->setContextProperty("receiptsVm", &receiptsViewModel);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(

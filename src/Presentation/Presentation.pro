@@ -7,11 +7,15 @@ CONFIG += c++17
 
 HEADERS += \
     Utils/AsyncExecutor.h \
-    ViewModels/EventsViewModel.h
+    ViewModels/EventsViewModel.h \
+    ViewModels/ParticipantsViewModel.h \
+    ViewModels/ReceiptsViewModel.h
 
 SOURCES += \
         Utils/AsyncExecutor.cpp \
         ViewModels/EventsViewModel.cpp \
+        ViewModels/ParticipantsViewModel.cpp \
+        ViewModels/ReceiptsViewModel.cpp \
         main.cpp
 
 RESOURCES += qml.qrc

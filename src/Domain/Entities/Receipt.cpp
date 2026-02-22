@@ -15,6 +15,16 @@ void Receipt::setId(qint32 newId)
     m_id = newId;
 }
 
+qint32 Receipt::eventId() const
+{
+    return m_eventId;
+}
+
+void Receipt::setEventId(qint32 newEventId)
+{
+    m_eventId = newEventId;
+}
+
 QString Receipt::title() const
 {
     return m_title;
@@ -35,12 +45,12 @@ void Receipt::setPurchaseDateTime(const QDateTime &newPurchaseDateTime)
     m_purchaseDateTime = newPurchaseDateTime;
 }
 
-Participant Receipt::buyer() const
+std::optional<Participant> Receipt::buyer() const
 {
     return m_buyer;
 }
 
-void Receipt::setBuyer(const Participant &newBuyer)
+void Receipt::setBuyer(const std::optional<Participant> &newBuyer)
 {
     m_buyer = newBuyer;
 }
