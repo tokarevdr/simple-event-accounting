@@ -15,7 +15,7 @@ ReceiptsViewModel::ReceiptsViewModel(AsyncExecutor &executor,
 
 int ReceiptsViewModel::rowCount(const QModelIndex &parent) const
 {
-    if (!parent.isValid())
+    if (parent.isValid())
         return 0;
 
     return m_receipts.count();
