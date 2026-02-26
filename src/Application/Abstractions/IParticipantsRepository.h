@@ -18,7 +18,7 @@ public:
 
     virtual qint32 createParticipant(const Domain::Participant &participant) = 0;
 
-    virtual QVector<Domain::Participant> readParticipants() const = 0;
+    virtual QVector<Domain::Participant> readParticipants() = 0;
 
     virtual bool updateParticipant(const Domain::Participant &participant) = 0;
 

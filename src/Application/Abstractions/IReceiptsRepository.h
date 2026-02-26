@@ -18,7 +18,7 @@ public:
 
     virtual qint32 createReceipt(const Domain::Receipt &receipt) = 0;
 
-    virtual QVector<Domain::Receipt> readReceipts(qint32 eventId) const = 0;
+    virtual QVector<Domain::Receipt> readReceipts(qint32 eventId) = 0;
 
     virtual bool updateReceipt(const Domain::Receipt &receipt) = 0;
 

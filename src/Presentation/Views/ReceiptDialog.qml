@@ -10,6 +10,8 @@ Dialog {
     property alias receiptTitle: titleTextField.text
     property alias purchaseDate: purchaseDatePicker.selectedDate
     property alias purchaseTime: purchaseTimePicker.selectedTime
+    property alias buyerId: buyerComboBox.currentValue
+    property alias buyerName: buyerComboBox.currentText
 
     standardButtons: Dialog.Ok | Dialog.Cancel
 
@@ -60,6 +62,25 @@ Dialog {
 
             Layout.fillHeight: true
             Layout.fillWidth: true
+        }
+
+        Label {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            text: "Покупатель:"
+        }
+
+        ComboBox {
+            id: buyerComboBox
+
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            model: participantsProxyVm
+            textRole: "nameRole"
+            valueRole: "idRole"
+            editable: true
         }
     }
 

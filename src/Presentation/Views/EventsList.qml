@@ -34,6 +34,13 @@ Item {
             delegate: Item {
                 height: eventsListView.height / 10
                 width: eventsListView.width
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    onClicked: root.eventClicked(idRole)
+                }
+
                 RowLayout {
                     anchors.fill: parent
 
@@ -77,17 +84,11 @@ Item {
                         Button {
                             anchors.fill: parent
 
-                            text: "..."
+                            text: "⋮"
 
                             onClicked: eventMenu.open()
                         }
                     }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-
-                    onClicked: root.eventClicked(idRole)
                 }
 
                 Menu {

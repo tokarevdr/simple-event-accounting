@@ -19,7 +19,7 @@ public:
 
     virtual qint32 createEvent(const Domain::Event &event) = 0;
 
-    virtual QVector<Domain::Event> readEvents() const = 0;
+    virtual QVector<Domain::Event> readEvents() = 0;
 
     virtual bool updateEvent(const Domain::Event &event) = 0;
 

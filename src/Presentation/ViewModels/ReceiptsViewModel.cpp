@@ -59,6 +59,10 @@ QHash<int, QByteArray> ReceiptsViewModel::roleNames() const
 
 void ReceiptsViewModel::setEventId(qint32 id)
 {
+    if (id == m_eventId) {
+        return;
+    }
+
     m_eventId = id;
 
     if (id == -1) {
@@ -80,7 +84,8 @@ void ReceiptsViewModel::setEventId(qint32 id)
 void ReceiptsViewModel::createReceipt(const QString &title,
                                       const QDate &purchaseDate,
                                       const QTime &purchaseTime,
-                                      qint32 buyerId)
+                                      qint32 buyerId,
+                                      const QString &buyerName)
 {
     if (m_eventId == -1) {
         qDebug() << "No event selected.";
@@ -112,6 +117,7 @@ void ReceiptsViewModel::createReceipt(const QString &title,
     } else {
         Domain::Participant buyer;
         buyer.setId(buyerId);
+        buyer.setName(buyerName);
         receipt.setBuyer(buyer);
     }
 
@@ -131,10 +137,73 @@ void ReceiptsViewModel::updateReceipt(int index,
                                       const QString &title,
                                       const QDate &purchaseDate,
                                       const QTime &purchaseTime,
-                                      qint32 buyerId)
-{}
+                                      qint32 buyerId,
+                                      const QString &buyerName)
+{
+    if (m_eventId == -1) {
+        qDebug() << "No event selected.";
+        return;
+    }
 
-void ReceiptsViewModel::deleteReceipt(int index) {}
+    if (title.isEmpty()) {
+        qDebug() << "Title should not be empty.";
+        return;
+    }
+
+    if (!purchaseDate.isValid()) {
+        qDebug() << "Purchase date is invalid.";
+        return;
+    }
+
+    if (!purchaseTime.isValid()) {
+        qDebug() << "Purchase time is invalid.";
+        return;
+    }
+
+    Domain::Receipt receipt;
+    receipt.setEventId(m_eventId);
+    receipt.setTitle(title);
+    receipt.setPurchaseDateTime(QDateTime(purchaseDate, purchaseTime));
+
+    if (buyerId == -1) {
+        receipt.setBuyer(std::nullopt);
+    } else {
+        Domain::Participant buyer;
+        buyer.setId(buyerId);
+        buyer.setName(buyerName);
+        receipt.setBuyer(buyer);
+    }
+
+    m_executor.exec<bool>([this, receipt]() { return m_repository.updateReceipt(receipt); },
+                          [this, &receipt, index](const bool &isOk) {
+                              if (!isOk) {
+                                  qDebug() << "Receipt was not updated.";
+                                  return;
+                              }
+
+                              QModelIndex modelIndex = QAbstractListModel::index(index);
+
+                              m_receipts.replace(index, receipt);
+                              dataChanged(modelIndex, modelIndex);
+                          });
+}
+
+void ReceiptsViewModel::deleteReceipt(int index)
+{
+    qint32 id = m_receipts[index].id();
+
+    m_executor.exec<bool>([this, id]() { return m_repository.deleteReceipt(id); },
+                          [this, index](const bool &isOk) {
+                              if (!isOk) {
+                                  qDebug() << "Receipt was not deleted.";
+                                  return;
+                              }
+
+                              beginRemoveRows(QModelIndex(), index, index);
+                              m_receipts.removeAt(index);
+                              endRemoveRows();
+                          });
+}
 
 } // namespace Presentation
 } // namespace Sea

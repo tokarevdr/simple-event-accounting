@@ -1,6 +1,7 @@
 #include "SqliteEventsRepository.h"
 
 #include <QDebug>
+#include <QMutexLocker>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>
@@ -60,6 +61,8 @@ SqliteEventsRepository::SqliteEventsRepository()
 
 qint32 SqliteEventsRepository::createEvent(const Domain::Event &event)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
 
     query.prepare(R"(INSERT INTO events (title, start_date, end_date)
@@ -76,8 +79,10 @@ qint32 SqliteEventsRepository::createEvent(const Domain::Event &event)
     return query.lastInsertId().toInt();
 }
 
-QVector<Domain::Event> SqliteEventsRepository::readEvents() const
+QVector<Domain::Event> SqliteEventsRepository::readEvents()
 {
+    QMutexLocker locker(&m_mutex);
+
     QVector<Domain::Event> events;
     QSqlQuery query(m_db);
 
@@ -106,6 +111,8 @@ QVector<Domain::Event> SqliteEventsRepository::readEvents() const
 
 bool SqliteEventsRepository::updateEvent(const Domain::Event &event)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
 
     query.prepare(
@@ -124,6 +131,8 @@ bool SqliteEventsRepository::updateEvent(const Domain::Event &event)
 
 bool SqliteEventsRepository::deleteEvent(int id)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
 
     query.prepare(R"(DELETE FROM events WHERE event_id = :event_id)");
@@ -134,6 +143,8 @@ bool SqliteEventsRepository::deleteEvent(int id)
 
 qint32 SqliteEventsRepository::createReceipt(const Domain::Receipt &receipt)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
 
     query.prepare(R"(INSERT INTO receipts (event_id, buyer_id, title, purchase_datetime)
@@ -151,8 +162,10 @@ qint32 SqliteEventsRepository::createReceipt(const Domain::Receipt &receipt)
     return query.lastInsertId().toInt();
 }
 
-QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId) const
+QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
     QVector<Domain::Receipt> receipts;
 
@@ -161,7 +174,7 @@ QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId) co
             FROM receipts as r
             LEFT JOIN participants AS p ON r.buyer_id = p.participant_id
             WHERE r.event_id = :event_id
-            ORDER BY r.purchase_datetime DESC)");
+            ORDER BY r.purchase_datetime ASC)");
     query.bindValue(":event_id", eventId);
 
     if (!query.exec()) {
@@ -190,12 +203,41 @@ QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId) co
     return receipts;
 }
 
-bool SqliteEventsRepository::updateReceipt(const Domain::Receipt &receipt) {}
+bool SqliteEventsRepository::updateReceipt(const Domain::Receipt &receipt)
+{
+    QMutexLocker locker(&m_mutex);
 
-bool SqliteEventsRepository::deleteReceipt(qint32 id) {}
+    QSqlQuery query(m_db);
+
+    query.prepare(
+        R"(UPDATE receipts SET event_id = :event_id, buyer_id = :buyer_id, title = :title, purchase_datetime = :purchase_datetime
+            WHERE receipt_id = :receipt_id)");
+    query.bindValue(":receipt_id", receipt.id());
+    query.bindValue(":event_id", receipt.eventId());
+    query.bindValue(":buyer_id",
+                    receipt.buyer().has_value() ? receipt.buyer().value().id() : QVariant());
+    query.bindValue(":title", receipt.title());
+    query.bindValue(":purchase_datetime", receipt.purchaseDateTime().toSecsSinceEpoch());
+
+    return query.exec();
+}
+
+bool SqliteEventsRepository::deleteReceipt(qint32 id)
+{
+    QMutexLocker locker(&m_mutex);
+
+    QSqlQuery query(m_db);
+
+    query.prepare(R"(DELETE FROM receipts WHERE receipt_id = :receipt_id)");
+    query.bindValue(":receipt_id", id);
+
+    return query.exec();
+}
 
 qint32 SqliteEventsRepository::createParticipant(const Domain::Participant &participant)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
 
     query.prepare(R"(INSERT INTO participants (name)
@@ -208,8 +250,10 @@ qint32 SqliteEventsRepository::createParticipant(const Domain::Participant &part
     return query.lastInsertId().toInt();
 }
 
-QVector<Domain::Participant> SqliteEventsRepository::readParticipants() const
+QVector<Domain::Participant> SqliteEventsRepository::readParticipants()
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
     QVector<Domain::Participant> participants;
 
@@ -228,6 +272,8 @@ QVector<Domain::Participant> SqliteEventsRepository::readParticipants() const
 
 bool SqliteEventsRepository::updateParticipant(const Domain::Participant &participant)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
 
     query.prepare(R"(UPDATE participants SET name = :name WHERE participant_id = :participant_id)");
@@ -239,6 +285,8 @@ bool SqliteEventsRepository::updateParticipant(const Domain::Participant &partic
 
 bool SqliteEventsRepository::deleteParticipant(qint32 id)
 {
+    QMutexLocker locker(&m_mutex);
+
     QSqlQuery query(m_db);
 
     query.prepare(R"(DELETE FROM participants WHERE participant_id = :participant_id)");

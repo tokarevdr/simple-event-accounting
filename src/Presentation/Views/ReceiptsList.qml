@@ -74,6 +74,17 @@ Item {
 
                     Item {
                         Layout.fillHeight: true
+                        Layout.fillWidth: true
+
+                        Text {
+                            anchors.fill: parent
+
+                            text: buyerNameRole
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
                         Layout.preferredWidth: 50
 
                         Button {
@@ -114,7 +125,8 @@ Item {
                                                                 receiptTitle,
                                                                 purchaseDate,
                                                                 purchaseTime,
-                                                                -1)
+                                                                buyerId,
+                                                                buyerName)
                 }
             }
         }
@@ -124,6 +136,7 @@ Item {
         id: createReceiptDialog
 
         onAccepted: receiptsViewModel.createReceipt(receiptTitle, purchaseDate,
-                                                    purchaseTime, -1)
+                                                    purchaseTime, buyerId,
+                                                    buyerName)
     }
 }

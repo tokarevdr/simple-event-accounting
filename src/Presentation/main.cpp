@@ -2,6 +2,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QSortFilterProxyModel>
 
 #include "Repositories/SqliteEventsRepository.h"
 #include "ViewModels/EventsViewModel.h"
@@ -22,10 +23,16 @@ int main(
     Sea::Presentation::ParticipantsViewModel participantsViewModel(asyncExecutor, repo);
     Sea::Presentation::ReceiptsViewModel receiptsViewModel(asyncExecutor, repo);
 
+    QSortFilterProxyModel participantsProxyViewModel;
+    participantsProxyViewModel.setSourceModel(&participantsViewModel);
+    participantsProxyViewModel.setFilterRole(Sea::Presentation::ParticipantsViewModel::NameRole);
+    participantsProxyViewModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
+
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("eventsVm", &eventsViewModel);
     engine.rootContext()->setContextProperty("participantsVm", &participantsViewModel);
+    engine.rootContext()->setContextProperty("participantsProxyVm", &participantsProxyViewModel);
     engine.rootContext()->setContextProperty("receiptsVm", &receiptsViewModel);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));

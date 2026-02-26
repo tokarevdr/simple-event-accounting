@@ -32,13 +32,15 @@ public:
     Q_INVOKABLE void createReceipt(const QString &title,
                                    const QDate &purchaseDate,
                                    const QTime &purchaseTime,
-                                   qint32 buyerId);
+                                   qint32 buyerId,
+                                   const QString &buyerName);
 
     Q_INVOKABLE void updateReceipt(int index,
                                    const QString &title,
                                    const QDate &purchaseDate,
                                    const QTime &purchaseTime,
-                                   qint32 buyerId);
+                                   qint32 buyerId,
+                                   const QString &buyerName);
 
     Q_INVOKABLE void deleteReceipt(int index);
 
