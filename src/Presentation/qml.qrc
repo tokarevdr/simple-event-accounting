@@ -9,5 +9,7 @@
         <file>Views/ReceiptDialog.qml</file>
         <file>Views/Controls/TimePicker.qml</file>
         <file>Views/ReceiptsList.qml</file>
+        <file>Views/ReceiptItemsList.qml</file>
+        <file>Views/ReceiptItemDialog.qml</file>
     </qresource>
 </RCC>

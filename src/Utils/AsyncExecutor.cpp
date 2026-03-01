@@ -1,12 +1,12 @@
 #include "AsyncExecutor.h"
 
 namespace Sea {
-namespace Presentation {
+namespace Utils {
 
 AsyncExecutor::AsyncExecutor(
     QObject *parent)
     : QObject{parent}
 {}
 
-} // namespace Presentation
+} // namespace Utils
 } // namespace Sea

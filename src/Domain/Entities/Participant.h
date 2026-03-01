@@ -19,8 +19,8 @@ public:
     void setName(const QString &newName);
 
 private:
-    qint32 m_id = 0;
-    QString m_name;
+    qint32 m_id = -1;
+    QString m_name = "-";
 };
 
 } // namespace Domain

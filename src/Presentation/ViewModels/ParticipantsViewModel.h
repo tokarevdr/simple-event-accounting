@@ -4,8 +4,8 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IParticipantsRepository.h"
+#include "AsyncExecutor.h"
 #include "Entities/Participant.h"
-#include "Utils/AsyncExecutor.h"
 
 namespace Sea {
 namespace Presentation {
@@ -17,7 +17,7 @@ class ParticipantsViewModel : public QAbstractListModel
 public:
     enum Role { IdRole, NameRole };
 
-    explicit ParticipantsViewModel(AsyncExecutor &executor,
+    explicit ParticipantsViewModel(Utils::AsyncExecutor &executor,
                                    Application::IParticipantsRepository &repository,
                                    QObject *parent = nullptr);
 
@@ -35,7 +35,7 @@ public:
     Q_INVOKABLE void deleteParticipant(int index);
 
 private:
-    AsyncExecutor &m_executor;
+    Utils::AsyncExecutor &m_executor;
     QVector<Domain::Participant> m_participants;
     Application::IParticipantsRepository &m_repository;
 };

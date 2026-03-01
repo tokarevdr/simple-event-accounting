@@ -34,6 +34,7 @@ Button {
                             Layout.fillHeight: true
                             Layout.preferredWidth: 40
 
+                            flat: true
                             text: "<<"
 
                             onClicked: calendar.showPreviousYear()
@@ -43,6 +44,7 @@ Button {
                             Layout.fillHeight: true
                             Layout.preferredWidth: 20
 
+                            flat: true
                             text: "<"
 
                             onClicked: calendar.showPreviousMonth()
@@ -62,6 +64,7 @@ Button {
                             Layout.fillHeight: true
                             Layout.preferredWidth: 20
 
+                            flat: true
                             text: ">"
 
                             onClicked: calendar.showNextMonth()
@@ -71,6 +74,7 @@ Button {
                             Layout.fillHeight: true
                             Layout.preferredWidth: 40
 
+                            flat: true
                             text: ">>"
 
                             onClicked: calendar.showNextYear()

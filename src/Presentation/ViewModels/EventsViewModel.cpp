@@ -5,9 +5,8 @@
 namespace Sea {
 namespace Presentation {
 
-EventsViewModel::EventsViewModel(AsyncExecutor &executor,
-                                 Application::IEventsRepository &repository,
-                                 QObject *parent)
+EventsViewModel::EventsViewModel(
+    Utils::AsyncExecutor &executor, Application::IEventsRepository &repository, QObject *parent)
     : QAbstractListModel(parent)
     , m_executor{executor}
     , m_repository{repository}

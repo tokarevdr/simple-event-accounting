@@ -5,11 +5,7 @@ import QtQuick.Layouts 1.15
 Item {
     id: root
 
-    property var eventsViewModel: null
-    property var formatDate: function (date) {
-        return Qt.formatDate(date, "dd.MM.yyyy")
-    }
-    signal eventClicked(int eventId)
+    property var receiptItemsViewModel: null
 
     ColumnLayout {
         anchors.fill: root
@@ -21,29 +17,22 @@ Item {
             text: "Create"
 
             onClicked: {
-                createEventDialog.clear()
-                createEventDialog.open()
+                createReceiptItemDialog.clear()
+                createReceiptItemDialog.open()
             }
         }
 
         ListView {
-            id: eventsListView
+            id: receiptItemsListView
 
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: eventsViewModel
+            model: receiptItemsViewModel
 
             delegate: Item {
-                height: eventsListView.height / 10
-                width: eventsListView.width
-
-                MouseArea {
-                    anchors.fill: parent
-
-                    onClicked: root.eventClicked(idRole)
-                }
-
+                height: receiptItemsListView.height / 10
+                width: receiptItemsListView.width
                 RowLayout {
                     anchors.fill: parent
 
@@ -54,7 +43,7 @@ Item {
                         Text {
                             anchors.fill: parent
 
-                            text: titleRole
+                            text: nameRole
                         }
                     }
 
@@ -65,7 +54,7 @@ Item {
                         Text {
                             anchors.fill: parent
 
-                            text: root.formatDate(startDateRole)
+                            text: priceRole
                         }
                     }
 
@@ -76,7 +65,7 @@ Item {
                         Text {
                             anchors.fill: parent
 
-                            text: root.formatDate(endDateRole)
+                            text: countRole
                         }
                     }
 
@@ -87,49 +76,51 @@ Item {
                         Button {
                             anchors.fill: parent
 
-                            text: "⋮"
+                            text: "..."
 
-                            onClicked: eventMenu.open()
+                            onClicked: receiptItemMenu.open()
                         }
                     }
                 }
 
                 Menu {
-                    id: eventMenu
+                    id: receiptItemMenu
 
                     MenuItem {
                         text: "Edit"
 
                         onTriggered: {
-                            editEventDialog.eventTitle = titleRole
-                            editEventDialog.eventStartDate = startDateRole
-                            editEventDialog.eventEndDate = endDateRole
-                            editEventDialog.open()
+                            editReceiptItemDialog.receiptItemName = nameRole
+                            editReceiptItemDialog.receiptItemPrice = priceRole
+                            editReceiptItemDialog.receiptItemCount = countRole
+                            editReceiptItemDialog.open()
                         }
                     }
 
                     MenuItem {
                         text: "Delete"
 
-                        onTriggered: eventsViewModel.deleteEvent(index)
+                        onTriggered: receiptItemsViewModel.deleteReceiptItem(
+                                         index)
                     }
                 }
 
-                EventDialog {
-                    id: editEventDialog
+                ReceiptItemDialog {
+                    id: editReceiptItemDialog
 
-                    onAccepted: eventsViewModel.updateEvent(index, eventTitle,
-                                                            eventStartDate,
-                                                            eventEndDate)
+                    onAccepted: receiptItemsViewModel.updateReceiptItem(
+                                    index, receiptItemName, receiptItemPrice,
+                                    receiptItemCount)
                 }
             }
         }
     }
 
-    EventDialog {
-        id: createEventDialog
+    ReceiptItemDialog {
+        id: createReceiptItemDialog
 
-        onAccepted: eventsViewModel.createEvent(eventTitle, eventStartDate,
-                                                eventEndDate)
+        onAccepted: receiptItemsViewModel.createReceiptItem(receiptItemName,
+                                                            receiptItemPrice,
+                                                            receiptItemCount)
     }
 }

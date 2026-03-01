@@ -26,6 +26,10 @@ ApplicationWindow {
         TabButton {
             text: qsTr("Receipts")
         }
+
+        TabButton {
+            text: qsTr("Receipt Items")
+        }
     }
 
     StackLayout {
@@ -67,6 +71,20 @@ ApplicationWindow {
                 anchors.fill: parent
                 anchors.margins: 5
                 receiptsViewModel: receiptsVm
+
+                onReceiptClicked: receiptItemsVm.setReceiptId(receiptId)
+            }
+        }
+
+        Item {
+            id: receiptItemsTab
+
+            ReceiptItemsList {
+                id: receiptItemsList
+
+                anchors.fill: parent
+                anchors.margins: 5
+                receiptItemsViewModel: receiptItemsVm
             }
         }
     }

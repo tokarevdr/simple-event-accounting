@@ -5,9 +5,8 @@
 namespace Sea {
 namespace Presentation {
 
-ReceiptsViewModel::ReceiptsViewModel(AsyncExecutor &executor,
-                                     Application::IReceiptsRepository &repository,
-                                     QObject *parent)
+ReceiptsViewModel::ReceiptsViewModel(
+    Utils::AsyncExecutor &executor, Application::IReceiptsRepository &repository, QObject *parent)
     : QAbstractListModel(parent)
     , m_executor{executor}
     , m_repository{repository}
@@ -38,7 +37,7 @@ QVariant ReceiptsViewModel::data(const QModelIndex &index, int role) const
         case PurchaseTimeRole:
             return receipt.purchaseDateTime().time();
         case BuyerNameRole:
-            return receipt.buyer().has_value() ? receipt.buyer().value().name() : "";
+            return receipt.buyer().has_value() ? receipt.buyer().value().name() : "-";
         default:
             return QVariant();
     }
@@ -160,7 +159,7 @@ void ReceiptsViewModel::updateReceipt(int index,
         return;
     }
 
-    Domain::Receipt receipt;
+    Domain::Receipt receipt = m_receipts[index];
     receipt.setEventId(m_eventId);
     receipt.setTitle(title);
     receipt.setPurchaseDateTime(QDateTime(purchaseDate, purchaseTime));

@@ -88,6 +88,7 @@ Dialog {
         titleTextField.text = ""
         purchaseDatePicker.selectedDate = new Date()
         purchaseTimePicker.selectedTime = new Date()
+        buyerComboBox.currentIndex = -1
     }
 
     enter: Transition {

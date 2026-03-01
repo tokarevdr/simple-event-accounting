@@ -15,11 +15,13 @@ CONFIG += c++17
 SOURCES += \
     Abstractions/IEventsRepository.cpp \
     Abstractions/IParticipantsRepository.cpp \
+    Abstractions/IReceiptItemsRepository.cpp \
     Abstractions/IReceiptsRepository.cpp
 
 HEADERS += \
     Abstractions/IEventsRepository.h \
     Abstractions/IParticipantsRepository.h \
+    Abstractions/IReceiptItemsRepository.h \
     Abstractions/IReceiptsRepository.h \
     Application_global.h
 

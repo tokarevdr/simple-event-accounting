@@ -4,8 +4,8 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IEventsRepository.h"
+#include "AsyncExecutor.h"
 #include "Entities/Event.h"
-#include "Utils/AsyncExecutor.h"
 
 namespace Sea {
 namespace Presentation {
@@ -17,7 +17,7 @@ class EventsViewModel : public QAbstractListModel
 public:
     enum Role { IdRole, TitleRole, StartDateRole, EndDateRole };
 
-    explicit EventsViewModel(AsyncExecutor &executor,
+    explicit EventsViewModel(Utils::AsyncExecutor &executor,
                              Application::IEventsRepository &repository,
                              QObject *parent = nullptr);
 
@@ -38,7 +38,7 @@ public:
     Q_INVOKABLE void deleteEvent(int index);
 
 private:
-    AsyncExecutor &m_executor;
+    Utils::AsyncExecutor &m_executor;
     QVector<Domain::Event> m_events;
     Application::IEventsRepository &m_repository;
 };

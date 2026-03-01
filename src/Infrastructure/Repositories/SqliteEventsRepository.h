@@ -6,6 +6,7 @@
 
 #include "Abstractions/IEventsRepository.h"
 #include "Abstractions/IParticipantsRepository.h"
+#include "Abstractions/IReceiptItemsRepository.h"
 #include "Abstractions/IReceiptsRepository.h"
 #include "Infrastructure_global.h"
 
@@ -14,7 +15,8 @@ namespace Infrastructure {
 
 class INFRASTRUCTURE_EXPORT SqliteEventsRepository : public Application::IEventsRepository,
                                                      public Application::IParticipantsRepository,
-                                                     public Application::IReceiptsRepository
+                                                     public Application::IReceiptsRepository,
+                                                     public Application::IReceiptItemsRepository
 {
 public:
     SqliteEventsRepository();
@@ -23,7 +25,7 @@ public:
     qint32 createEvent(const Domain::Event &event) override;
     QVector<Domain::Event> readEvents() override;
     bool updateEvent(const Domain::Event &event) override;
-    bool deleteEvent(int id) override;
+    bool deleteEvent(qint32 id) override;
 
     // IReceiptsRepository interface
     qint32 createReceipt(const Domain::Receipt &receipt) override;
@@ -36,6 +38,12 @@ public:
     QVector<Domain::Participant> readParticipants() override;
     bool updateParticipant(const Domain::Participant &participant) override;
     bool deleteParticipant(qint32 id) override;
+
+    // IReceiptItemsRepository interface
+    qint32 createReceiptItem(const Domain::ReceiptItem &receiptItem) override;
+    QVector<Domain::ReceiptItem> readReceiptItems(qint32 receiptId) override;
+    bool updateReceiptItem(const Domain::ReceiptItem &receiptItem) override;
+    bool deleteReceiptItem(qint32 id) override;
 
 private:
     QSqlDatabase m_db;

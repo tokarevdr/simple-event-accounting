@@ -16,7 +16,10 @@ Item {
 
             text: "Create"
 
-            onClicked: createParticipantDialog.open()
+            onClicked: {
+                createParticipantDialog.clear()
+                createParticipantDialog.open()
+            }
         }
 
         ListView {

@@ -7,6 +7,7 @@
 #include "Repositories/SqliteEventsRepository.h"
 #include "ViewModels/EventsViewModel.h"
 #include "ViewModels/ParticipantsViewModel.h"
+#include "ViewModels/ReceiptItemsViewModel.h"
 #include "ViewModels/ReceiptsViewModel.h"
 
 int main(
@@ -18,10 +19,11 @@ int main(
     QGuiApplication app(argc, argv);
 
     Sea::Infrastructure::SqliteEventsRepository repo;
-    Sea::Presentation::AsyncExecutor asyncExecutor;
+    Sea::Utils::AsyncExecutor asyncExecutor;
     Sea::Presentation::EventsViewModel eventsViewModel(asyncExecutor, repo);
     Sea::Presentation::ParticipantsViewModel participantsViewModel(asyncExecutor, repo);
     Sea::Presentation::ReceiptsViewModel receiptsViewModel(asyncExecutor, repo);
+    Sea::Presentation::ReceiptItemsViewModel receiptItemsViewMOdel(asyncExecutor, repo);
 
     QSortFilterProxyModel participantsProxyViewModel;
     participantsProxyViewModel.setSourceModel(&participantsViewModel);
@@ -34,6 +36,7 @@ int main(
     engine.rootContext()->setContextProperty("participantsVm", &participantsViewModel);
     engine.rootContext()->setContextProperty("participantsProxyVm", &participantsProxyViewModel);
     engine.rootContext()->setContextProperty("receiptsVm", &receiptsViewModel);
+    engine.rootContext()->setContextProperty("receiptItemsVm", &receiptItemsViewMOdel);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(

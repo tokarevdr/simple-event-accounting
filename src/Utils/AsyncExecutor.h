@@ -6,11 +6,12 @@
 #include <QFutureWatcher>
 #include <QObject>
 #include <QtConcurrent/QtConcurrentRun>
+#include "Utils_global.h"
 
 namespace Sea {
-namespace Presentation {
+namespace Utils {
 
-class AsyncExecutor : public QObject
+class UTILS_EXPORT AsyncExecutor : public QObject
 {
     Q_OBJECT
 public:
@@ -44,7 +45,7 @@ public:
     }
 };
 
-} // namespace Presentation
+} // namespace Utils
 } // namespace Sea
 
 #endif // ASYNCEXECUTOR_H

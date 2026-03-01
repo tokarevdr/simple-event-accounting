@@ -6,15 +6,15 @@ include(../../app.pri)
 CONFIG += c++17
 
 HEADERS += \
-    Utils/AsyncExecutor.h \
     ViewModels/EventsViewModel.h \
     ViewModels/ParticipantsViewModel.h \
+    ViewModels/ReceiptItemsViewModel.h \
     ViewModels/ReceiptsViewModel.h
 
 SOURCES += \
-        Utils/AsyncExecutor.cpp \
         ViewModels/EventsViewModel.cpp \
         ViewModels/ParticipantsViewModel.cpp \
+        ViewModels/ReceiptItemsViewModel.cpp \
         ViewModels/ReceiptsViewModel.cpp \
         main.cpp
 
@@ -32,22 +32,26 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 CONFIG(release, debug|release) {
+    LIBS += -L$$OUT_PWD/../Utils/lib -lUtils
     LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
     LIBS += -L$$OUT_PWD/../Application/lib -lApplication
     LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructure
 }
 CONFIG(debug, debug|release) {
+    LIBS += -L$$OUT_PWD/../Utils/lib -lUtilsd
     LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
     LIBS += -L$$OUT_PWD/../Application/lib -lApplicationd
     LIBS += -L$$OUT_PWD/../Infrastructure/lib -lInfrastructured
 }
 
 INCLUDEPATH += \
+    $$PWD/../Utils \
     $$PWD/../Domain \
     $$PWD/../Application \
     $$PWD/../Infrastructure
 
 DEPENDPATH += \
+    $$PWD/../Utils \
     $$PWD/../Domain \
     $$PWD/../Application \
     $$PWD/../Infrastructure

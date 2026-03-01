@@ -52,9 +52,22 @@ SqliteEventsRepository::SqliteEventsRepository()
                     purchase_datetime INTEGER NOT NULL,
                     PRIMARY KEY (receipt_id AUTOINCREMENT)
                     FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
-                    FOREIGN KEY (buyer_id) REFERENCES participants(participant_id) ON DELETE SET NULL)
+                    FOREIGN KEY (buyer_id) REFERENCES participants(participant_id) ON DELETE CASCADE)
                 )")) {
         qDebug() << "Receipts table was not created.";
+        qDebug() << query.lastError().text();
+    }
+
+    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS receipt_items (
+                    receipt_item_id INTEGER,
+                    receipt_id INTEGER,
+                    name TEXT NOT NULL,
+                    price INTEGER NOT NULL,
+                    count INTEGER NOT NULL,
+                    PRIMARY KEY (receipt_item_id AUTOINCREMENT)
+                    FOREIGN KEY (receipt_id) REFERENCES receipts(receipt_id) ON DELETE CASCADE)
+                )")) {
+        qDebug() << "Receipt items table was not created.";
         qDebug() << query.lastError().text();
     }
 }
@@ -129,7 +142,7 @@ bool SqliteEventsRepository::updateEvent(const Domain::Event &event)
     return query.exec();
 }
 
-bool SqliteEventsRepository::deleteEvent(int id)
+bool SqliteEventsRepository::deleteEvent(qint32 id)
 {
     QMutexLocker locker(&m_mutex);
 
@@ -291,6 +304,87 @@ bool SqliteEventsRepository::deleteParticipant(qint32 id)
 
     query.prepare(R"(DELETE FROM participants WHERE participant_id = :participant_id)");
     query.bindValue(":participant_id", id);
+
+    return query.exec();
+}
+
+qint32 SqliteEventsRepository::createReceiptItem(const Domain::ReceiptItem &receiptItem)
+{
+    QMutexLocker locker(&m_mutex);
+
+    QSqlQuery query(m_db);
+
+    query.prepare(R"(INSERT INTO receipt_items (receipt_id, name, price, count)
+                     VALUES (:receipt_id, :name, :price, :count))");
+    query.bindValue(":receipt_id", receiptItem.receiptId());
+    query.bindValue(":name", receiptItem.name());
+    query.bindValue(":price", receiptItem.price());
+    query.bindValue(":count", receiptItem.count());
+
+    if (!query.exec()) {
+        qDebug() << query.lastError().text();
+    }
+
+    return query.lastInsertId().toInt();
+}
+
+QVector<Domain::ReceiptItem> SqliteEventsRepository::readReceiptItems(qint32 receiptId)
+{
+    QMutexLocker locker(&m_mutex);
+
+    QSqlQuery query(m_db);
+    QVector<Domain::ReceiptItem> receiptItems;
+
+    query.prepare(
+        R"(SELECT i.receipt_item_id, i.receipt_id, i.name, i.price, i.count
+            FROM receipt_items as i
+            WHERE i.receipt_id = :receipt_id)");
+    query.bindValue(":receipt_id", receiptId);
+
+    if (!query.exec()) {
+        qDebug() << query.lastError().text();
+    }
+
+    while (query.next()) {
+        Domain::ReceiptItem receiptItem;
+        receiptItem.setId(query.value(0).toInt());
+        receiptItem.setReceiptId(query.value(1).toInt());
+        receiptItem.setName(query.value(2).toString());
+        receiptItem.setPrice(query.value(3).toInt());
+        receiptItem.setCount(query.value(4).toInt());
+
+        receiptItems.append(receiptItem);
+    }
+
+    return receiptItems;
+}
+
+bool SqliteEventsRepository::updateReceiptItem(const Domain::ReceiptItem &receiptItem)
+{
+    QMutexLocker locker(&m_mutex);
+
+    QSqlQuery query(m_db);
+
+    query.prepare(
+        R"(UPDATE receipt_items SET receipt_id = :receipt_id, name = :name, price = :price, count = :count
+            WHERE receipt_item_id = :receipt_item_id)");
+    query.bindValue(":receipt_item_id", receiptItem.id());
+    query.bindValue(":receipt_id", receiptItem.receiptId());
+    query.bindValue(":name", receiptItem.name());
+    query.bindValue(":price", receiptItem.price());
+    query.bindValue(":count", receiptItem.count());
+
+    return query.exec();
+}
+
+bool SqliteEventsRepository::deleteReceiptItem(qint32 id)
+{
+    QMutexLocker locker(&m_mutex);
+
+    QSqlQuery query(m_db);
+
+    query.prepare(R"(DELETE FROM receipt_items WHERE receipt_item_id = :receipt_item_id)");
+    query.bindValue(":receipt_item_id", id);
 
     return query.exec();
 }

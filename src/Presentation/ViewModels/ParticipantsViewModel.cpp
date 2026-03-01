@@ -5,9 +5,10 @@
 namespace Sea {
 namespace Presentation {
 
-ParticipantsViewModel::ParticipantsViewModel(AsyncExecutor &executor,
-                                             Application::IParticipantsRepository &repository,
-                                             QObject *parent)
+ParticipantsViewModel::ParticipantsViewModel(
+    Utils::AsyncExecutor &executor,
+    Application::IParticipantsRepository &repository,
+    QObject *parent)
     : QAbstractListModel(parent)
     , m_executor{executor}
     , m_repository{repository}

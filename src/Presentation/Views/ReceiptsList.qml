@@ -12,6 +12,7 @@ Item {
     property var formatTime: function (date) {
         return Qt.formatTime(date, "hh:mm:ss")
     }
+    signal receiptClicked(int receiptId)
 
     ColumnLayout {
         anchors.fill: root
@@ -22,7 +23,10 @@ Item {
 
             text: "Create"
 
-            onClicked: createReceiptDialog.open()
+            onClicked: {
+                createReceiptDialog.clear()
+                createReceiptDialog.open()
+            }
         }
 
         ListView {
@@ -36,6 +40,13 @@ Item {
             delegate: Item {
                 height: receiptsListView.height / 10
                 width: receiptsListView.width
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    onClicked: root.receiptClicked(idRole)
+                }
+
                 RowLayout {
                     anchors.fill: parent
 
