@@ -20,53 +20,63 @@ SqliteEventsRepository::SqliteEventsRepository()
 
     QSqlQuery query(m_db);
 
-    if (!query.exec("PRAGMA foreign_keys = ON;")) {
+    QString queryStr = QString(R"(PRAGMA foreign_keys = ON;)");
+
+    if (!query.exec(queryStr)) {
         qDebug() << query.lastError().text();
     }
 
-    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS events (
-                    event_id INTEGER,
-                    title TEXT NOT NULL,
-                    start_date TEXT,
-                    end_date TEXT,
-                    PRIMARY KEY(event_id AUTOINCREMENT))
-                )")) {
+    queryStr = QString(R"(CREATE TABLE IF NOT EXISTS events (
+                          event_id INTEGER,
+                          title TEXT NOT NULL,
+                          start_date TEXT,
+                          end_date TEXT,
+                          PRIMARY KEY(event_id AUTOINCREMENT))
+                        )");
+
+    if (!query.exec(queryStr)) {
         qDebug() << "Events table was not created.";
         qDebug() << query.lastError().text();
     }
 
-    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS participants (
-                    participant_id INTEGER,
-                    name TEXT NOT NULL,
-                    PRIMARY KEY(participant_id AUTOINCREMENT))
-                )")) {
+    queryStr = QString(R"(CREATE TABLE IF NOT EXISTS participants (
+                          participant_id INTEGER,
+                          name TEXT NOT NULL,
+                          PRIMARY KEY(participant_id AUTOINCREMENT))
+                        )");
+
+    if (!query.exec(queryStr)) {
         qDebug() << "Participants table was not created.";
         qDebug() << query.lastError().text();
     }
 
-    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS receipts (
-                    receipt_id INTEGER,
-                    event_id INTEGER,
-                    buyer_id INTEGER,
-                    title TEXT NOT NULL,
-                    purchase_datetime INTEGER NOT NULL,
-                    PRIMARY KEY (receipt_id AUTOINCREMENT)
-                    FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
-                    FOREIGN KEY (buyer_id) REFERENCES participants(participant_id) ON DELETE CASCADE)
-                )")) {
+    queryStr = QString(R"(CREATE TABLE IF NOT EXISTS receipts (
+                          receipt_id INTEGER,
+                          event_id INTEGER,
+                          buyer_id INTEGER,
+                          title TEXT NOT NULL,
+                          purchase_datetime INTEGER NOT NULL,
+                          PRIMARY KEY (receipt_id AUTOINCREMENT)
+                          FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
+                          FOREIGN KEY (buyer_id) REFERENCES participants(participant_id) ON DELETE CASCADE)
+                        )");
+
+    if (!query.exec(queryStr)) {
         qDebug() << "Receipts table was not created.";
         qDebug() << query.lastError().text();
     }
 
-    if (!query.exec(R"(CREATE TABLE IF NOT EXISTS receipt_items (
-                    receipt_item_id INTEGER,
-                    receipt_id INTEGER,
-                    name TEXT NOT NULL,
-                    price INTEGER NOT NULL,
-                    count INTEGER NOT NULL,
-                    PRIMARY KEY (receipt_item_id AUTOINCREMENT)
-                    FOREIGN KEY (receipt_id) REFERENCES receipts(receipt_id) ON DELETE CASCADE)
-                )")) {
+    queryStr = QString(R"(CREATE TABLE IF NOT EXISTS receipt_items (
+                          receipt_item_id INTEGER,
+                          receipt_id INTEGER,
+                          name TEXT NOT NULL,
+                          price INTEGER NOT NULL,
+                          count INTEGER NOT NULL,
+                          PRIMARY KEY (receipt_item_id AUTOINCREMENT)
+                          FOREIGN KEY (receipt_id) REFERENCES receipts(receipt_id) ON DELETE CASCADE)
+                        )");
+
+    if (!query.exec(queryStr)) {
         qDebug() << "Receipt items table was not created.";
         qDebug() << query.lastError().text();
     }
@@ -76,8 +86,14 @@ Utils::Result<qint32, QString> SqliteEventsRepository::createEvent(const Domain:
 {
     QSqlQuery query(m_db);
 
-    query.prepare(R"(INSERT INTO events (title, start_date, end_date)
-                     VALUES (:title, :start_date, :end_date))");
+    QString queryStr = QString(R"(INSERT INTO events (title, start_date, end_date)
+                                  VALUES (:title, :start_date, :end_date))");
+
+    if (!query.prepare(queryStr)) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать событие.");
+    }
+
     query.bindValue(":title", event.title());
     query.bindValue(":start_date",
                     event.startDate().has_value() ? event.startDate().value().toString("dd.MM.yyyy")
@@ -106,7 +122,9 @@ Utils::Result<QVector<Domain::Event>, QString> SqliteEventsRepository::readEvent
     QVector<Domain::Event> events;
     QSqlQuery query(m_db);
 
-    if (!query.exec(R"(SELECT * FROM events)")) {
+    QString queryStr = QString(R"(SELECT * FROM events)");
+
+    if (!query.exec(queryStr)) {
         qDebug() << Q_FUNC_INFO << query.lastError().text();
         return QString("Не удалось получить список событий.");
     }
@@ -136,8 +154,11 @@ Utils::Result<Utils::Unit, QString> SqliteEventsRepository::updateEvent(const Do
 {
     QSqlQuery query(m_db);
 
-    if (!query.prepare(
-            R"(UPDATE events SET title = :title, start_date = :start_date, end_date = :end_date WHERE event_id = :event_id)")) {
+    QString queryStr = QString(
+        R"(UPDATE events SET title = :title, start_date = :start_date, end_date = :end_date
+           WHERE event_id = :event_id)");
+
+    if (!query.prepare(queryStr)) {
         qDebug() << Q_FUNC_INFO << query.lastError().text();
         return QString("Не удалось обновить событие.");
     }
@@ -163,7 +184,10 @@ Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteEvent(qint32 i
 {
     QSqlQuery query(m_db);
 
-    if (!query.prepare(R"(DELETE FROM events WHERE event_id = :event_id)")) {
+    QString queryStr = QString(R"(DELETE FROM events
+                                  WHERE event_id = :event_id)");
+
+    if (!query.prepare(queryStr)) {
         qDebug() << Q_FUNC_INFO << query.lastError().text();
         return QString("Не удалось удалить запрос.");
     }
