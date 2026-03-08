@@ -5,6 +5,8 @@
 
 #include "Application_global.h"
 #include "Entities/Event.h"
+#include "Result.h"
+#include "Unit.h"
 
 namespace Sea {
 namespace Application {
@@ -17,13 +19,13 @@ public:
 
     virtual ~IEventsRepository() = default;
 
-    virtual qint32 createEvent(const Domain::Event &event) = 0;
+    virtual Utils::Result<qint32, QString> createEvent(const Domain::Event &event) = 0;
 
-    virtual QVector<Domain::Event> readEvents() = 0;
+    virtual Utils::Result<QVector<Domain::Event>, QString> readEvents() = 0;
 
-    virtual bool updateEvent(const Domain::Event &event) = 0;
+    virtual Utils::Result<Utils::Unit, QString> updateEvent(const Domain::Event &event) = 0;
 
-    virtual bool deleteEvent(qint32 id) = 0;
+    virtual Utils::Result<Utils::Unit, QString> deleteEvent(qint32 id) = 0;
 };
 
 } // namespace Application

@@ -5,12 +5,9 @@
 namespace Sea {
 namespace Presentation {
 
-ReceiptItemsViewModel::ReceiptItemsViewModel(
-    Utils::AsyncExecutor &executor,
-    Application::IReceiptItemsRepository &repository,
-    QObject *parent)
+ReceiptItemsViewModel::ReceiptItemsViewModel(Application::IReceiptItemsRepository &repository,
+                                             QObject *parent)
     : QAbstractListModel(parent)
-    , m_executor{executor}
     , m_repository{repository}
 {}
 
@@ -70,16 +67,16 @@ void ReceiptItemsViewModel::setReceiptId(qint32 id)
         return;
     }
 
-    m_executor
-        .exec<QVector<Domain::ReceiptItem>>([this,
-                                             id]() { return m_repository.readReceiptItems(id); },
-                                            [this](
-                                                const QVector<Domain::ReceiptItem> &receiptItems) {
-                                                beginResetModel();
-                                                m_receiptItems = receiptItems;
-                                                endResetModel();
-                                                qDebug() << receiptItems.count();
-                                            });
+    auto result = m_repository.readReceiptItems(id);
+
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    beginResetModel();
+    m_receiptItems = result.value();
+    endResetModel();
 }
 
 void ReceiptItemsViewModel::createReceiptItem(const QString &name, int price, int count)
@@ -110,17 +107,18 @@ void ReceiptItemsViewModel::createReceiptItem(const QString &name, int price, in
     receiptItem.setPrice(price);
     receiptItem.setCount(count);
 
-    m_executor.exec<qint32>([this,
-                             receiptItem]() { return m_repository.createReceiptItem(receiptItem); },
-                            [this, &receiptItem](const qint32 &id) {
-                                receiptItem.setId(id);
+    auto result = m_repository.createReceiptItem(receiptItem);
 
-                                beginInsertRows(QModelIndex(),
-                                                m_receiptItems.count(),
-                                                m_receiptItems.count());
-                                m_receiptItems.append(receiptItem);
-                                endInsertRows();
-                            });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    receiptItem.setId(result.value());
+
+    beginInsertRows(QModelIndex(), m_receiptItems.count(), m_receiptItems.count());
+    m_receiptItems.append(receiptItem);
+    endInsertRows();
 }
 
 void ReceiptItemsViewModel::updateReceiptItem(int index, const QString &name, int price, int count)
@@ -151,36 +149,33 @@ void ReceiptItemsViewModel::updateReceiptItem(int index, const QString &name, in
     receiptItem.setPrice(price);
     receiptItem.setCount(count);
 
-    m_executor.exec<bool>([this,
-                           receiptItem]() { return m_repository.updateReceiptItem(receiptItem); },
-                          [this, &receiptItem, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Receipt item was not updated.";
-                                  return;
-                              }
+    auto result = m_repository.updateReceiptItem(receiptItem);
 
-                              QModelIndex modelIndex = QAbstractListModel::index(index);
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
 
-                              m_receiptItems.replace(index, receiptItem);
-                              dataChanged(modelIndex, modelIndex);
-                          });
+    QModelIndex modelIndex = QAbstractListModel::index(index);
+
+    m_receiptItems.replace(index, receiptItem);
+    dataChanged(modelIndex, modelIndex);
 }
 
 void ReceiptItemsViewModel::deleteReceiptItem(int index)
 {
     qint32 id = m_receiptItems[index].id();
 
-    m_executor.exec<bool>([this, id]() { return m_repository.deleteReceiptItem(id); },
-                          [this, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Receipt item was not deleted.";
-                                  return;
-                              }
+    auto result = m_repository.deleteReceiptItem(id);
 
-                              beginRemoveRows(QModelIndex(), index, index);
-                              m_receiptItems.removeAt(index);
-                              endRemoveRows();
-                          });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), index, index);
+    m_receiptItems.removeAt(index);
+    endRemoveRows();
 }
 
 } // namespace Presentation

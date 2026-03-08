@@ -1,15 +1,33 @@
 #ifndef RESULT_H
 #define RESULT_H
 
-#include "Utils_global.h"
-
 namespace Sea {
 namespace Utils {
 
-class UTILS_EXPORT Result
+template<typename T, typename E>
+class Result
 {
 public:
-    Result();
+    Result(const T &value)
+        : m_value{value}
+        , m_isOk{true}
+    {}
+
+    Result(const E &error)
+        : m_error{error}
+        , m_isOk{false}
+    {}
+
+    bool isOk() const { return m_isOk; }
+
+    T value() const { return m_value; }
+
+    E error() const { return m_error; }
+
+private:
+    T m_value;
+    E m_error;
+    bool m_isOk;
 };
 
 } // namespace Utils

@@ -5,19 +5,20 @@
 namespace Sea {
 namespace Presentation {
 
-EventsViewModel::EventsViewModel(
-    Utils::AsyncExecutor &executor, Application::IEventsRepository &repository, QObject *parent)
+EventsViewModel::EventsViewModel(Application::IEventsRepository &repository, QObject *parent)
     : QAbstractListModel(parent)
-    , m_executor{executor}
     , m_repository{repository}
 {
-    m_executor.exec<QVector<Domain::Event>>([this]() { return m_repository.readEvents(); },
-                                            [this](const QVector<Domain::Event> &events) {
-                                                beginResetModel();
-                                                m_events = events;
-                                                endResetModel();
-                                                qDebug() << events.count();
-                                            });
+    auto result = m_repository.readEvents();
+
+    if (!result.isOk()) {
+        qDebug() << result.error();
+    } else {
+        beginResetModel();
+        m_events = result.value();
+        endResetModel();
+        qDebug() << m_events.count();
+    }
 }
 
 int EventsViewModel::rowCount(
@@ -90,14 +91,17 @@ void EventsViewModel::createEvent(const QString &title, const QDate &startDate, 
     event.setStartDate(startDate);
     event.setEndDate(endDate);
 
-    m_executor.exec<qint32>([this, event]() { return m_repository.createEvent(event); },
-                            [this, &event](const qint32 &id) {
-                                event.setId(id);
+    auto result = m_repository.createEvent(event);
 
-                                beginInsertRows(QModelIndex(), m_events.count(), m_events.count());
-                                m_events.append(event);
-                                endInsertRows();
-                            });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    event.setId(result.value());
+    beginInsertRows(QModelIndex(), m_events.count(), m_events.count());
+    m_events.append(event);
+    endInsertRows();
 }
 
 void EventsViewModel::updateEvent(int index,
@@ -130,35 +134,33 @@ void EventsViewModel::updateEvent(int index,
     event.setStartDate(startDate);
     event.setEndDate(endDate);
 
-    m_executor.exec<bool>([this, event]() { return m_repository.updateEvent(event); },
-                          [this, &event, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Event was not updated.";
-                                  return;
-                              }
+    auto result = m_repository.updateEvent(event);
 
-                              QModelIndex modelIndex = QAbstractListModel::index(index);
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
 
-                              m_events.replace(index, event);
-                              dataChanged(modelIndex, modelIndex);
-                          });
+    QModelIndex modelIndex = QAbstractListModel::index(index);
+
+    m_events.replace(index, event);
+    dataChanged(modelIndex, modelIndex);
 }
 
 void EventsViewModel::deleteEvent(int index)
 {
     qint32 id = m_events[index].id();
 
-    m_executor.exec<bool>([this, id]() { return m_repository.deleteEvent(id); },
-                          [this, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Event was not deleted.";
-                                  return;
-                              }
+    auto result = m_repository.deleteEvent(id);
 
-                              beginRemoveRows(QModelIndex(), index, index);
-                              m_events.removeAt(index);
-                              endRemoveRows();
-                          });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), index, index);
+    m_events.removeAt(index);
+    endRemoveRows();
 }
 
 } // namespace Presentation

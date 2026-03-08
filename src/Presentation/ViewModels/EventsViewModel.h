@@ -4,7 +4,6 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IEventsRepository.h"
-#include "AsyncExecutor.h"
 #include "Entities/Event.h"
 
 namespace Sea {
@@ -17,9 +16,7 @@ class EventsViewModel : public QAbstractListModel
 public:
     enum Role { IdRole, TitleRole, StartDateRole, EndDateRole };
 
-    explicit EventsViewModel(Utils::AsyncExecutor &executor,
-                             Application::IEventsRepository &repository,
-                             QObject *parent = nullptr);
+    explicit EventsViewModel(Application::IEventsRepository &repository, QObject *parent = nullptr);
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -38,7 +35,6 @@ public:
     Q_INVOKABLE void deleteEvent(int index);
 
 private:
-    Utils::AsyncExecutor &m_executor;
     QVector<Domain::Event> m_events;
     Application::IEventsRepository &m_repository;
 };

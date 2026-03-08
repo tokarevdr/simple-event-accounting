@@ -5,6 +5,8 @@
 
 #include "Application_global.h"
 #include "Entities/Receipt.h"
+#include "Result.h"
+#include "Unit.h"
 
 namespace Sea {
 namespace Application {
@@ -16,13 +18,13 @@ public:
 
     virtual ~IReceiptsRepository() = default;
 
-    virtual qint32 createReceipt(const Domain::Receipt &receipt) = 0;
+    virtual Utils::Result<qint32, QString> createReceipt(const Domain::Receipt &receipt) = 0;
 
-    virtual QVector<Domain::Receipt> readReceipts(qint32 eventId) = 0;
+    virtual Utils::Result<QVector<Domain::Receipt>, QString> readReceipts(qint32 eventId) = 0;
 
-    virtual bool updateReceipt(const Domain::Receipt &receipt) = 0;
+    virtual Utils::Result<Utils::Unit, QString> updateReceipt(const Domain::Receipt &receipt) = 0;
 
-    virtual bool deleteReceipt(qint32 id) = 0;
+    virtual Utils::Result<Utils::Unit, QString> deleteReceipt(qint32 id) = 0;
 };
 
 } // namespace Application

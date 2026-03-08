@@ -31,8 +31,20 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
+CONFIG(release, debug|release) {
+    LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
+    LIBS += -L$$OUT_PWD/../Utils/lib -lUtils
+}
 
-INCLUDEPATH += $$PWD/../Domain
-DEPENDPATH += $$PWD/../Domain
+CONFIG(debug, debug|release) {
+    LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
+    LIBS += -L$$OUT_PWD/../Utils/lib -lUtilsd
+}
+
+INCLUDEPATH += \
+    $$PWD/../Domain \
+    $$PWD/../Utils
+
+DEPENDPATH += \
+    $$PWD/../Domain \
+    $$PWD/../Utils

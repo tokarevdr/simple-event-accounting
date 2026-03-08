@@ -4,7 +4,6 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IReceiptsRepository.h"
-#include "AsyncExecutor.h"
 #include "Entities/Receipt.h"
 
 namespace Sea {
@@ -17,8 +16,7 @@ class ReceiptsViewModel : public QAbstractListModel
 public:
     enum Role { IdRole, TitleRole, PurchaseDateRole, PurchaseTimeRole, BuyerNameRole };
 
-    explicit ReceiptsViewModel(Utils::AsyncExecutor &executor,
-                               Application::IReceiptsRepository &repository,
+    explicit ReceiptsViewModel(Application::IReceiptsRepository &repository,
                                QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -45,7 +43,6 @@ public:
     Q_INVOKABLE void deleteReceipt(int index);
 
 private:
-    Utils::AsyncExecutor &m_executor;
     qint32 m_eventId = -1;
     QVector<Domain::Receipt> m_receipts;
     Application::IReceiptsRepository &m_repository;

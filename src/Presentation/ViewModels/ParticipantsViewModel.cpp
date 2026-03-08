@@ -5,22 +5,20 @@
 namespace Sea {
 namespace Presentation {
 
-ParticipantsViewModel::ParticipantsViewModel(
-    Utils::AsyncExecutor &executor,
-    Application::IParticipantsRepository &repository,
-    QObject *parent)
+ParticipantsViewModel::ParticipantsViewModel(Application::IParticipantsRepository &repository,
+                                             QObject *parent)
     : QAbstractListModel(parent)
-    , m_executor{executor}
     , m_repository{repository}
 {
-    m_executor
-        .exec<QVector<Domain::Participant>>([this]() { return m_repository.readParticipants(); },
-                                            [this](
-                                                const QVector<Domain::Participant> &participants) {
-                                                beginResetModel();
-                                                m_participants = participants;
-                                                endResetModel();
-                                            });
+    auto result = m_repository.readParticipants();
+
+    if (!result.isOk()) {
+        qDebug() << result.error();
+    } else {
+        beginResetModel();
+        m_participants = result.value();
+        endResetModel();
+    }
 }
 
 int ParticipantsViewModel::rowCount(const QModelIndex &parent) const
@@ -68,17 +66,18 @@ void ParticipantsViewModel::createParticipant(const QString &name)
     Domain::Participant participant;
     participant.setName(name);
 
-    m_executor.exec<qint32>([this,
-                             participant]() { return m_repository.createParticipant(participant); },
-                            [this, &participant](const qint32 &id) {
-                                participant.setId(id);
+    auto result = m_repository.createParticipant(participant);
 
-                                beginInsertRows(QModelIndex(),
-                                                m_participants.count(),
-                                                m_participants.count());
-                                m_participants.append(participant);
-                                endInsertRows();
-                            });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    participant.setId(result.value());
+
+    beginInsertRows(QModelIndex(), m_participants.count(), m_participants.count());
+    m_participants.append(participant);
+    endInsertRows();
 }
 
 void ParticipantsViewModel::updateParticipant(int index, const QString &name)
@@ -91,36 +90,33 @@ void ParticipantsViewModel::updateParticipant(int index, const QString &name)
     Domain::Participant participant = m_participants[index];
     participant.setName(name);
 
-    m_executor.exec<bool>([this,
-                           participant]() { return m_repository.updateParticipant(participant); },
-                          [this, &participant, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Participant was not updated.";
-                                  return;
-                              }
+    auto result = m_repository.updateParticipant(participant);
 
-                              QModelIndex modelIndex = QAbstractListModel::index(index);
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
 
-                              m_participants.replace(index, participant);
-                              dataChanged(modelIndex, modelIndex);
-                          });
+    QModelIndex modelIndex = QAbstractListModel::index(index);
+
+    m_participants.replace(index, participant);
+    dataChanged(modelIndex, modelIndex);
 }
 
 void ParticipantsViewModel::deleteParticipant(int index)
 {
     qint32 id = m_participants[index].id();
 
-    m_executor.exec<bool>([this, id]() { return m_repository.deleteParticipant(id); },
-                          [this, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Participant was not deleted.";
-                                  return;
-                              }
+    auto result = m_repository.deleteParticipant(id);
 
-                              beginRemoveRows(QModelIndex(), index, index);
-                              m_participants.removeAt(index);
-                              endRemoveRows();
-                          });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), index, index);
+    m_participants.removeAt(index);
+    endRemoveRows();
 }
 
 } // namespace Presentation

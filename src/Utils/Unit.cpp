@@ -1,9 +1,9 @@
-#include "Result.h"
+#include "Unit.h"
 
 namespace Sea {
 namespace Utils {
 
-Result::Result() {}
+Unit::Unit() {}
 
 } // namespace Utils
 } // namespace Sea

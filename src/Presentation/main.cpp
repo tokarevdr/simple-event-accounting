@@ -19,11 +19,10 @@ int main(
     QGuiApplication app(argc, argv);
 
     Sea::Infrastructure::SqliteEventsRepository repo;
-    Sea::Utils::AsyncExecutor asyncExecutor;
-    Sea::Presentation::EventsViewModel eventsViewModel(asyncExecutor, repo);
-    Sea::Presentation::ParticipantsViewModel participantsViewModel(asyncExecutor, repo);
-    Sea::Presentation::ReceiptsViewModel receiptsViewModel(asyncExecutor, repo);
-    Sea::Presentation::ReceiptItemsViewModel receiptItemsViewMOdel(asyncExecutor, repo);
+    Sea::Presentation::EventsViewModel eventsViewModel(repo);
+    Sea::Presentation::ParticipantsViewModel participantsViewModel(repo);
+    Sea::Presentation::ReceiptsViewModel receiptsViewModel(repo);
+    Sea::Presentation::ReceiptItemsViewModel receiptItemsViewMOdel(repo);
 
     QSortFilterProxyModel participantsProxyViewModel;
     participantsProxyViewModel.setSourceModel(&participantsViewModel);

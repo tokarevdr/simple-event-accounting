@@ -9,11 +9,10 @@ include(../../lib.pri)
 CONFIG += c++17
 
 SOURCES += \
-    AsyncExecutor.cpp \
-    Result.cpp
+    Unit.cpp
 
 HEADERS += \
-    AsyncExecutor.h \
+    Unit.h \
     Utils_global.h \
     Result.h
 

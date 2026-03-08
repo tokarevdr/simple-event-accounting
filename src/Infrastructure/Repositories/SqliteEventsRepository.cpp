@@ -72,10 +72,8 @@ SqliteEventsRepository::SqliteEventsRepository()
     }
 }
 
-qint32 SqliteEventsRepository::createEvent(const Domain::Event &event)
+Utils::Result<qint32, QString> SqliteEventsRepository::createEvent(const Domain::Event &event)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
     query.prepare(R"(INSERT INTO events (title, start_date, end_date)
@@ -87,19 +85,31 @@ qint32 SqliteEventsRepository::createEvent(const Domain::Event &event)
     query.bindValue(":end_date",
                     event.endDate().has_value() ? event.endDate().value().toString("dd.MM.yyyy")
                                                 : QVariant());
-    query.exec();
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать событие.");
+    }
+
+    auto id = query.lastInsertId();
+
+    if (!id.isValid()) {
+        qDebug() << Q_FUNC_INFO << "Last insert id is invalid.";
+        return QString("Не удалось получить созданное событие.");
+    }
 
     return query.lastInsertId().toInt();
 }
 
-QVector<Domain::Event> SqliteEventsRepository::readEvents()
+Utils::Result<QVector<Domain::Event>, QString> SqliteEventsRepository::readEvents()
 {
-    QMutexLocker locker(&m_mutex);
-
     QVector<Domain::Event> events;
     QSqlQuery query(m_db);
 
-    query.exec(R"(SELECT * FROM events)");
+    if (!query.exec(R"(SELECT * FROM events)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список событий.");
+    }
 
     while (query.next()) {
         Domain::Event event;
@@ -122,14 +132,16 @@ QVector<Domain::Event> SqliteEventsRepository::readEvents()
     return events;
 }
 
-bool SqliteEventsRepository::updateEvent(const Domain::Event &event)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::updateEvent(const Domain::Event &event)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(
-        R"(UPDATE events SET title = :title, start_date = :start_date, end_date = :end_date WHERE event_id = :event_id)");
+    if (!query.prepare(
+            R"(UPDATE events SET title = :title, start_date = :start_date, end_date = :end_date WHERE event_id = :event_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить событие.");
+    }
+
     query.bindValue(":event_id", event.id());
     query.bindValue(":title", event.title());
     query.bindValue(":start_date",
@@ -139,29 +151,42 @@ bool SqliteEventsRepository::updateEvent(const Domain::Event &event)
                     event.endDate().has_value() ? event.endDate().value().toString("dd.MM.yyyy")
                                                 : QVariant());
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить данные события.");
+    }
+
+    return Utils::Unit();
 }
 
-bool SqliteEventsRepository::deleteEvent(qint32 id)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteEvent(qint32 id)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(DELETE FROM events WHERE event_id = :event_id)");
+    if (!query.prepare(R"(DELETE FROM events WHERE event_id = :event_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить запрос.");
+    }
     query.bindValue(":event_id", id);
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить запрос.");
+    }
+
+    return Utils::Unit();
 }
 
-qint32 SqliteEventsRepository::createReceipt(const Domain::Receipt &receipt)
+Utils::Result<qint32, QString> SqliteEventsRepository::createReceipt(const Domain::Receipt &receipt)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(INSERT INTO receipts (event_id, buyer_id, title, purchase_datetime)
-                     VALUES (:event_id, :buyer_id, :title, :purchase_datetime))");
+    if (!query.prepare(R"(INSERT INTO receipts (event_id, buyer_id, title, purchase_datetime)
+                     VALUES (:event_id, :buyer_id, :title, :purchase_datetime))")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать чек.");
+    }
+
     query.bindValue(":event_id", receipt.eventId());
     query.bindValue(":buyer_id",
                     receipt.buyer().has_value() ? receipt.buyer().value().id() : QVariant());
@@ -169,29 +194,40 @@ qint32 SqliteEventsRepository::createReceipt(const Domain::Receipt &receipt)
     query.bindValue(":purchase_datetime", receipt.purchaseDateTime().toSecsSinceEpoch());
 
     if (!query.exec()) {
-        qDebug() << query.lastError().text();
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать чек.");
+    }
+
+    auto id = query.lastInsertId();
+
+    if (!id.isValid()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить созданный чек.");
     }
 
     return query.lastInsertId().toInt();
 }
 
-QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId)
+Utils::Result<QVector<Domain::Receipt>, QString> SqliteEventsRepository::readReceipts(qint32 eventId)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
     QVector<Domain::Receipt> receipts;
 
-    query.prepare(
-        R"(SELECT r.receipt_id, r.event_id, r.title, r.purchase_datetime, p.participant_id, p.name
+    if (!query.prepare(
+            R"(SELECT r.receipt_id, r.event_id, r.title, r.purchase_datetime, p.participant_id, p.name
             FROM receipts as r
             LEFT JOIN participants AS p ON r.buyer_id = p.participant_id
             WHERE r.event_id = :event_id
-            ORDER BY r.purchase_datetime ASC)");
+            ORDER BY r.purchase_datetime ASC)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список чеков.");
+    }
+
     query.bindValue(":event_id", eventId);
 
     if (!query.exec()) {
-        qDebug() << query.lastError().text();
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список чеков.");
     }
 
     while (query.next()) {
@@ -216,15 +252,17 @@ QVector<Domain::Receipt> SqliteEventsRepository::readReceipts(qint32 eventId)
     return receipts;
 }
 
-bool SqliteEventsRepository::updateReceipt(const Domain::Receipt &receipt)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::updateReceipt(
+    const Domain::Receipt &receipt)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(
-        R"(UPDATE receipts SET event_id = :event_id, buyer_id = :buyer_id, title = :title, purchase_datetime = :purchase_datetime
-            WHERE receipt_id = :receipt_id)");
+    if (!query.prepare(
+            R"(UPDATE receipts SET event_id = :event_id, buyer_id = :buyer_id, title = :title, purchase_datetime = :purchase_datetime
+            WHERE receipt_id = :receipt_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить данные чека.");
+    }
     query.bindValue(":receipt_id", receipt.id());
     query.bindValue(":event_id", receipt.eventId());
     query.bindValue(":buyer_id",
@@ -232,45 +270,70 @@ bool SqliteEventsRepository::updateReceipt(const Domain::Receipt &receipt)
     query.bindValue(":title", receipt.title());
     query.bindValue(":purchase_datetime", receipt.purchaseDateTime().toSecsSinceEpoch());
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить данные чека.");
+    }
+
+    return Utils::Unit();
 }
 
-bool SqliteEventsRepository::deleteReceipt(qint32 id)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteReceipt(qint32 id)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(DELETE FROM receipts WHERE receipt_id = :receipt_id)");
+    if (!query.prepare(R"(DELETE FROM receipts WHERE receipt_id = :receipt_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить удалить чек.");
+    }
+
     query.bindValue(":receipt_id", id);
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить удалить чек.");
+    }
+
+    return Utils::Unit();
 }
 
-qint32 SqliteEventsRepository::createParticipant(const Domain::Participant &participant)
+Utils::Result<qint32, QString> SqliteEventsRepository::createParticipant(
+    const Domain::Participant &participant)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(INSERT INTO participants (name)
-                    VALUES (:name))");
+    if (!query.prepare(R"(INSERT INTO participants (name)
+                    VALUES (:name))")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать участника.");
+    }
 
     query.bindValue(":name", participant.name());
 
-    query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать участника.");
+    }
+
+    auto id = query.lastInsertId();
+
+    if (!id.isValid()) {
+        qDebug() << Q_FUNC_INFO << "Last insert id is invalid.";
+        return QString("Не удалось получить созданного участника.");
+    }
 
     return query.lastInsertId().toInt();
 }
 
-QVector<Domain::Participant> SqliteEventsRepository::readParticipants()
+Utils::Result<QVector<Domain::Participant>, QString> SqliteEventsRepository::readParticipants()
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
     QVector<Domain::Participant> participants;
 
-    query.exec(R"(SELECT * FROM participants)");
+    if (!query.exec(R"(SELECT * FROM participants)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список участников.");
+    }
 
     while (query.next()) {
         Domain::Participant participant;
@@ -283,66 +346,97 @@ QVector<Domain::Participant> SqliteEventsRepository::readParticipants()
     return participants;
 }
 
-bool SqliteEventsRepository::updateParticipant(const Domain::Participant &participant)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::updateParticipant(
+    const Domain::Participant &participant)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(UPDATE participants SET name = :name WHERE participant_id = :participant_id)");
+    if (!query.prepare(
+            R"(UPDATE participants SET name = :name WHERE participant_id = :participant_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить данные участника.");
+    }
+
     query.bindValue(":participant_id", participant.id());
     query.bindValue(":name", participant.name());
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить данные участника.");
+    }
+
+    return Utils::Unit();
 }
 
-bool SqliteEventsRepository::deleteParticipant(qint32 id)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteParticipant(qint32 id)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(DELETE FROM participants WHERE participant_id = :participant_id)");
+    if (!query.prepare(R"(DELETE FROM participants WHERE participant_id = :participant_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить участника.");
+    }
+
     query.bindValue(":participant_id", id);
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить участника.");
+    }
+
+    return Utils::Unit();
 }
 
-qint32 SqliteEventsRepository::createReceiptItem(const Domain::ReceiptItem &receiptItem)
+Utils::Result<qint32, QString> SqliteEventsRepository::createReceiptItem(
+    const Domain::ReceiptItem &receiptItem)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(INSERT INTO receipt_items (receipt_id, name, price, count)
-                     VALUES (:receipt_id, :name, :price, :count))");
+    if (!query.prepare(R"(INSERT INTO receipt_items (receipt_id, name, price, count)
+                     VALUES (:receipt_id, :name, :price, :count))")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать запись в чеке.");
+    }
+
     query.bindValue(":receipt_id", receiptItem.receiptId());
     query.bindValue(":name", receiptItem.name());
     query.bindValue(":price", receiptItem.price());
     query.bindValue(":count", receiptItem.count());
 
     if (!query.exec()) {
-        qDebug() << query.lastError().text();
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать запись в чеке.");
+    }
+
+    auto id = query.lastInsertId();
+
+    if (!id.isValid()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить созданную запись в чеке.");
     }
 
     return query.lastInsertId().toInt();
 }
 
-QVector<Domain::ReceiptItem> SqliteEventsRepository::readReceiptItems(qint32 receiptId)
+Utils::Result<QVector<Domain::ReceiptItem>, QString> SqliteEventsRepository::readReceiptItems(
+    qint32 receiptId)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
     QVector<Domain::ReceiptItem> receiptItems;
 
-    query.prepare(
-        R"(SELECT i.receipt_item_id, i.receipt_id, i.name, i.price, i.count
+    if (!query.prepare(
+            R"(SELECT i.receipt_item_id, i.receipt_id, i.name, i.price, i.count
             FROM receipt_items as i
-            WHERE i.receipt_id = :receipt_id)");
+            WHERE i.receipt_id = :receipt_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список записей в чеке.");
+    }
+
     query.bindValue(":receipt_id", receiptId);
 
     if (!query.exec()) {
-        qDebug() << query.lastError().text();
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список записей в чеке.");
     }
 
     while (query.next()) {
@@ -359,34 +453,49 @@ QVector<Domain::ReceiptItem> SqliteEventsRepository::readReceiptItems(qint32 rec
     return receiptItems;
 }
 
-bool SqliteEventsRepository::updateReceiptItem(const Domain::ReceiptItem &receiptItem)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::updateReceiptItem(
+    const Domain::ReceiptItem &receiptItem)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(
-        R"(UPDATE receipt_items SET receipt_id = :receipt_id, name = :name, price = :price, count = :count
-            WHERE receipt_item_id = :receipt_item_id)");
+    if (!query.prepare(
+            R"(UPDATE receipt_items SET receipt_id = :receipt_id, name = :name, price = :price, count = :count
+            WHERE receipt_item_id = :receipt_item_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить даннные записи в чеке.");
+    }
+
     query.bindValue(":receipt_item_id", receiptItem.id());
     query.bindValue(":receipt_id", receiptItem.receiptId());
     query.bindValue(":name", receiptItem.name());
     query.bindValue(":price", receiptItem.price());
     query.bindValue(":count", receiptItem.count());
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить даннные записи в чеке.");
+    }
+
+    return Utils::Unit();
 }
 
-bool SqliteEventsRepository::deleteReceiptItem(qint32 id)
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteReceiptItem(qint32 id)
 {
-    QMutexLocker locker(&m_mutex);
-
     QSqlQuery query(m_db);
 
-    query.prepare(R"(DELETE FROM receipt_items WHERE receipt_item_id = :receipt_item_id)");
+    if (!query.prepare(R"(DELETE FROM receipt_items WHERE receipt_item_id = :receipt_item_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить запись в чеке.");
+    }
+
     query.bindValue(":receipt_item_id", id);
 
-    return query.exec();
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить запись в чеке.");
+    }
+
+    return Utils::Unit();
 }
 
 } // namespace Infrastructure

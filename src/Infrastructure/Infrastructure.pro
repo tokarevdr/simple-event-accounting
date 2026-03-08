@@ -26,14 +26,24 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
+CONFIG(release, debug|release) {
+    LIBS += -L$$OUT_PWD/../Domain/lib -lDomain
+    LIBS += -L$$OUT_PWD/../Application/lib -lApplication
+    LIBS += -L$$OUT_PWD/../Utils/lib -lUtils
+}
 
-INCLUDEPATH += $$PWD/../Domain
-DEPENDPATH += $$PWD/../Domain
+CONFIG(debug, debug|release) {
+    LIBS += -L$$OUT_PWD/../Domain/lib -lDomaind
+    LIBS += -L$$OUT_PWD/../Application/lib -lApplicationd
+    LIBS += -L$$OUT_PWD/../Utils/lib -lUtilsd
+}
 
-CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplication
-CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Application/lib -lApplicationd
+INCLUDEPATH += \
+    $$PWD/../Domain \
+    $$PWD/../Application \
+    $$PWD/../Utils
 
-INCLUDEPATH += $$PWD/../Application
-DEPENDPATH += $$PWD/../Application
+DEPENDPATH += \
+    $$PWD/../Domain \
+    $$PWD/../Application \
+    $$PWD/../Utils

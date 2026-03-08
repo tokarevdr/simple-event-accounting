@@ -5,10 +5,8 @@
 namespace Sea {
 namespace Presentation {
 
-ReceiptsViewModel::ReceiptsViewModel(
-    Utils::AsyncExecutor &executor, Application::IReceiptsRepository &repository, QObject *parent)
+ReceiptsViewModel::ReceiptsViewModel(Application::IReceiptsRepository &repository, QObject *parent)
     : QAbstractListModel(parent)
-    , m_executor{executor}
     , m_repository{repository}
 {}
 
@@ -71,13 +69,16 @@ void ReceiptsViewModel::setEventId(qint32 id)
         return;
     }
 
-    m_executor.exec<QVector<Domain::Receipt>>([this, id]() { return m_repository.readReceipts(id); },
-                                              [this](const QVector<Domain::Receipt> &receipts) {
-                                                  beginResetModel();
-                                                  m_receipts = receipts;
-                                                  endResetModel();
-                                                  qDebug() << receipts.count();
-                                              });
+    auto result = m_repository.readReceipts(id);
+
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    beginResetModel();
+    m_receipts = result.value();
+    endResetModel();
 }
 
 void ReceiptsViewModel::createReceipt(const QString &title,
@@ -120,16 +121,18 @@ void ReceiptsViewModel::createReceipt(const QString &title,
         receipt.setBuyer(buyer);
     }
 
-    m_executor.exec<qint32>([this, receipt]() { return m_repository.createReceipt(receipt); },
-                            [this, &receipt](const qint32 &id) {
-                                receipt.setId(id);
+    auto result = m_repository.createReceipt(receipt);
 
-                                beginInsertRows(QModelIndex(),
-                                                m_receipts.count(),
-                                                m_receipts.count());
-                                m_receipts.append(receipt);
-                                endInsertRows();
-                            });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    receipt.setId(result.value());
+
+    beginInsertRows(QModelIndex(), m_receipts.count(), m_receipts.count());
+    m_receipts.append(receipt);
+    endInsertRows();
 }
 
 void ReceiptsViewModel::updateReceipt(int index,
@@ -173,35 +176,33 @@ void ReceiptsViewModel::updateReceipt(int index,
         receipt.setBuyer(buyer);
     }
 
-    m_executor.exec<bool>([this, receipt]() { return m_repository.updateReceipt(receipt); },
-                          [this, &receipt, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Receipt was not updated.";
-                                  return;
-                              }
+    auto result = m_repository.updateReceipt(receipt);
 
-                              QModelIndex modelIndex = QAbstractListModel::index(index);
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
 
-                              m_receipts.replace(index, receipt);
-                              dataChanged(modelIndex, modelIndex);
-                          });
+    QModelIndex modelIndex = QAbstractListModel::index(index);
+
+    m_receipts.replace(index, receipt);
+    dataChanged(modelIndex, modelIndex);
 }
 
 void ReceiptsViewModel::deleteReceipt(int index)
 {
     qint32 id = m_receipts[index].id();
 
-    m_executor.exec<bool>([this, id]() { return m_repository.deleteReceipt(id); },
-                          [this, index](const bool &isOk) {
-                              if (!isOk) {
-                                  qDebug() << "Receipt was not deleted.";
-                                  return;
-                              }
+    auto result = m_repository.deleteReceipt(id);
 
-                              beginRemoveRows(QModelIndex(), index, index);
-                              m_receipts.removeAt(index);
-                              endRemoveRows();
-                          });
+    if (!result.isOk()) {
+        qDebug() << result.error();
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), index, index);
+    m_receipts.removeAt(index);
+    endRemoveRows();
 }
 
 } // namespace Presentation

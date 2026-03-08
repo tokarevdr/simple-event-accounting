@@ -1,7 +1,6 @@
 #ifndef SQLITEEVENTSREPOSITORY_H
 #define SQLITEEVENTSREPOSITORY_H
 
-#include <QMutex>
 #include <QSqlDatabase>
 
 #include "Abstractions/IEventsRepository.h"
@@ -22,32 +21,33 @@ public:
     SqliteEventsRepository();
 
     // IEventsRepository interface
-    qint32 createEvent(const Domain::Event &event) override;
-    QVector<Domain::Event> readEvents() override;
-    bool updateEvent(const Domain::Event &event) override;
-    bool deleteEvent(qint32 id) override;
+    Utils::Result<qint32, QString> createEvent(const Domain::Event &event) override;
+    Utils::Result<QVector<Domain::Event>, QString> readEvents() override;
+    Utils::Result<Utils::Unit, QString> updateEvent(const Domain::Event &event) override;
+    Utils::Result<Utils::Unit, QString> deleteEvent(qint32 id) override;
 
     // IReceiptsRepository interface
-    qint32 createReceipt(const Domain::Receipt &receipt) override;
-    QVector<Domain::Receipt> readReceipts(qint32 eventId) override;
-    bool updateReceipt(const Domain::Receipt &receipt) override;
-    bool deleteReceipt(qint32 id) override;
+    Utils::Result<qint32, QString> createReceipt(const Domain::Receipt &receipt) override;
+    Utils::Result<QVector<Domain::Receipt>, QString> readReceipts(qint32 eventId) override;
+    Utils::Result<Utils::Unit, QString> updateReceipt(const Domain::Receipt &receipt) override;
+    Utils::Result<Utils::Unit, QString> deleteReceipt(qint32 id) override;
 
     // IParticipantsRepository interface
-    qint32 createParticipant(const Domain::Participant &participant) override;
-    QVector<Domain::Participant> readParticipants() override;
-    bool updateParticipant(const Domain::Participant &participant) override;
-    bool deleteParticipant(qint32 id) override;
+    Utils::Result<qint32, QString> createParticipant(const Domain::Participant &participant) override;
+    Utils::Result<QVector<Domain::Participant>, QString> readParticipants() override;
+    Utils::Result<Utils::Unit, QString> updateParticipant(
+        const Domain::Participant &participant) override;
+    Utils::Result<Utils::Unit, QString> deleteParticipant(qint32 id) override;
 
     // IReceiptItemsRepository interface
-    qint32 createReceiptItem(const Domain::ReceiptItem &receiptItem) override;
-    QVector<Domain::ReceiptItem> readReceiptItems(qint32 receiptId) override;
-    bool updateReceiptItem(const Domain::ReceiptItem &receiptItem) override;
-    bool deleteReceiptItem(qint32 id) override;
+    Utils::Result<qint32, QString> createReceiptItem(const Domain::ReceiptItem &receiptItem) override;
+    Utils::Result<QVector<Domain::ReceiptItem>, QString> readReceiptItems(qint32 receiptId) override;
+    Utils::Result<Utils::Unit, QString> updateReceiptItem(
+        const Domain::ReceiptItem &receiptItem) override;
+    Utils::Result<Utils::Unit, QString> deleteReceiptItem(qint32 id) override;
 
 private:
     QSqlDatabase m_db;
-    QMutex m_mutex;
 };
 
 } // namespace Infrastructure
