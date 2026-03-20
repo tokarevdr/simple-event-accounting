@@ -119,5 +119,13 @@ void ParticipantsViewModel::deleteParticipant(int index)
     endRemoveRows();
 }
 
+int ParticipantsViewModel::participantIndexById(int id) const
+{
+    Domain::Participant participant;
+    participant.setId(id);
+
+    return m_participants.indexOf(participant);
+}
+
 } // namespace Presentation
 } // namespace Sea

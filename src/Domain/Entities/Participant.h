@@ -18,6 +18,8 @@ public:
     QString name() const;
     void setName(const QString &newName);
 
+    bool operator==(const Participant &other) const;
+
 private:
     qint32 m_id = -1;
     QString m_name = "-";

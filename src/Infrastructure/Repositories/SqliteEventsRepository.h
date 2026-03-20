@@ -3,6 +3,7 @@
 
 #include <QSqlDatabase>
 
+#include "Abstractions/IConsumersRepository.h"
 #include "Abstractions/IEventsRepository.h"
 #include "Abstractions/IParticipantsRepository.h"
 #include "Abstractions/IReceiptItemsRepository.h"
@@ -15,7 +16,8 @@ namespace Infrastructure {
 class INFRASTRUCTURE_EXPORT SqliteEventsRepository : public Application::IEventsRepository,
                                                      public Application::IParticipantsRepository,
                                                      public Application::IReceiptsRepository,
-                                                     public Application::IReceiptItemsRepository
+                                                     public Application::IReceiptItemsRepository,
+                                                     public Application::IConsumersRepository
 {
 public:
     SqliteEventsRepository();
@@ -45,6 +47,10 @@ public:
     Utils::Result<Utils::Unit, QString> updateReceiptItem(
         const Domain::ReceiptItem &receiptItem) override;
     Utils::Result<Utils::Unit, QString> deleteReceiptItem(qint32 id) override;
+
+    // IConsumersRepository interface
+    Utils::Result<Utils::Unit, QString> createConsumer(const Domain::Consumer &consumer) override;
+    Utils::Result<QVector<Domain::Consumer>, QString> readConsumers(qint32 receiptItemId) override;
 
 private:
     QSqlDatabase m_db;

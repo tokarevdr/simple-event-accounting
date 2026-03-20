@@ -25,5 +25,10 @@ void Participant::setName(const QString &newName)
     m_name = newName;
 }
 
+bool Participant::operator==(const Participant &other) const
+{
+    return m_id == other.m_id;
+}
+
 } // namespace Domain
 } // namespace Sea

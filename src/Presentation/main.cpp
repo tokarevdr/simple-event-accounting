@@ -5,6 +5,7 @@
 #include <QSortFilterProxyModel>
 
 #include "Repositories/SqliteEventsRepository.h"
+#include "ViewModels/ConsumersViewModel.h"
 #include "ViewModels/EventsViewModel.h"
 #include "ViewModels/ParticipantsViewModel.h"
 #include "ViewModels/ReceiptItemsViewModel.h"
@@ -22,12 +23,14 @@ int main(
     Sea::Presentation::EventsViewModel eventsViewModel(repo);
     Sea::Presentation::ParticipantsViewModel participantsViewModel(repo);
     Sea::Presentation::ReceiptsViewModel receiptsViewModel(repo);
-    Sea::Presentation::ReceiptItemsViewModel receiptItemsViewMOdel(repo);
+    Sea::Presentation::ReceiptItemsViewModel receiptItemsViewModel(repo);
 
     QSortFilterProxyModel participantsProxyViewModel;
     participantsProxyViewModel.setSourceModel(&participantsViewModel);
     participantsProxyViewModel.setFilterRole(Sea::Presentation::ParticipantsViewModel::NameRole);
     participantsProxyViewModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    Sea::Presentation::ConsumersViewModel consumersViewModel(repo);
 
     QQmlApplicationEngine engine;
 
@@ -35,7 +38,8 @@ int main(
     engine.rootContext()->setContextProperty("participantsVm", &participantsViewModel);
     engine.rootContext()->setContextProperty("participantsProxyVm", &participantsProxyViewModel);
     engine.rootContext()->setContextProperty("receiptsVm", &receiptsViewModel);
-    engine.rootContext()->setContextProperty("receiptItemsVm", &receiptItemsViewMOdel);
+    engine.rootContext()->setContextProperty("receiptItemsVm", &receiptItemsViewModel);
+    engine.rootContext()->setContextProperty("consumersVm", &consumersViewModel);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(

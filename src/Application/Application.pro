@@ -13,12 +13,14 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Abstractions/IConsumersRepository.cpp \
     Abstractions/IEventsRepository.cpp \
     Abstractions/IParticipantsRepository.cpp \
     Abstractions/IReceiptItemsRepository.cpp \
     Abstractions/IReceiptsRepository.cpp
 
 HEADERS += \
+    Abstractions/IConsumersRepository.h \
     Abstractions/IEventsRepository.h \
     Abstractions/IParticipantsRepository.h \
     Abstractions/IReceiptItemsRepository.h \

@@ -11,5 +11,7 @@
         <file>Views/ReceiptsList.qml</file>
         <file>Views/ReceiptItemsList.qml</file>
         <file>Views/ReceiptItemDialog.qml</file>
+        <file>Views/ConsumersList.qml</file>
+        <file>Views/ConsumerDialog.qml</file>
     </qresource>
 </RCC>

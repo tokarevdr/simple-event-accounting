@@ -6,6 +6,7 @@ Item {
     id: root
 
     property var receiptItemsViewModel: null
+    signal receiptItemClicked(int receiptItemId)
 
     ColumnLayout {
         anchors.fill: root
@@ -33,6 +34,13 @@ Item {
             delegate: Item {
                 height: receiptItemsListView.height / 10
                 width: receiptItemsListView.width
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    onClicked: root.receiptItemClicked(idRole)
+                }
+
                 RowLayout {
                     anchors.fill: parent
 

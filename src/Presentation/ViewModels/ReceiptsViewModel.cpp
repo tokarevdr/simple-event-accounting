@@ -36,6 +36,8 @@ QVariant ReceiptsViewModel::data(const QModelIndex &index, int role) const
             return receipt.purchaseDateTime().time();
         case BuyerNameRole:
             return receipt.buyer().has_value() ? receipt.buyer().value().name() : "-";
+        case BuyerIdRole:
+            return receipt.buyer().has_value() ? receipt.buyer().value().id() : -1;
         default:
             return QVariant();
     }
@@ -50,6 +52,7 @@ QHash<int, QByteArray> ReceiptsViewModel::roleNames() const
     names[PurchaseDateRole] = "purchaseDateRole";
     names[PurchaseTimeRole] = "purchaseTimeRole";
     names[BuyerNameRole] = "buyerNameRole";
+    names[BuyerIdRole] = "buyerIdRole";
 
     return names;
 }

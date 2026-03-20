@@ -27,7 +27,7 @@ SqliteEventsRepository::SqliteEventsRepository()
     }
 
     queryStr = QString(R"(CREATE TABLE IF NOT EXISTS events (
-                          event_id INTEGER,
+                          event_id INTEGER NOT NULL,
                           title TEXT NOT NULL,
                           start_date TEXT,
                           end_date TEXT,
@@ -40,7 +40,7 @@ SqliteEventsRepository::SqliteEventsRepository()
     }
 
     queryStr = QString(R"(CREATE TABLE IF NOT EXISTS participants (
-                          participant_id INTEGER,
+                          participant_id INTEGER NOT NULL,
                           name TEXT NOT NULL,
                           PRIMARY KEY(participant_id AUTOINCREMENT))
                         )");
@@ -51,8 +51,8 @@ SqliteEventsRepository::SqliteEventsRepository()
     }
 
     queryStr = QString(R"(CREATE TABLE IF NOT EXISTS receipts (
-                          receipt_id INTEGER,
-                          event_id INTEGER,
+                          receipt_id INTEGER NOT NULL,
+                          event_id INTEGER NOT NULL,
                           buyer_id INTEGER,
                           title TEXT NOT NULL,
                           purchase_datetime INTEGER NOT NULL,
@@ -67,8 +67,8 @@ SqliteEventsRepository::SqliteEventsRepository()
     }
 
     queryStr = QString(R"(CREATE TABLE IF NOT EXISTS receipt_items (
-                          receipt_item_id INTEGER,
-                          receipt_id INTEGER,
+                          receipt_item_id INTEGER NOT NULL,
+                          receipt_id INTEGER NOT NULL,
                           name TEXT NOT NULL,
                           price INTEGER NOT NULL,
                           count INTEGER NOT NULL,
@@ -78,6 +78,19 @@ SqliteEventsRepository::SqliteEventsRepository()
 
     if (!query.exec(queryStr)) {
         qDebug() << "Receipt items table was not created.";
+        qDebug() << query.lastError().text();
+    }
+
+    queryStr = QString(R"(CREATE TABLE IF NOT EXISTS receipt_items_participants (
+                          receipt_item_id INTEGER NOT NULL,
+                          participant_id INTEGER NOT NULL,
+                          consumption_ratio INTEGER NOT NULL DEFAULT 1,
+                          PRIMARY KEY (receipt_item_id, participant_id)
+                          FOREIGN KEY (participant_id) REFERENCES participants(participant_id) ON DELETE CASCADE
+                          FOREIGN KEY (receipt_item_id) REFERENCES receipt_items(receipt_item_id) ON DELETE CASCADE))");
+
+    if (!query.exec(queryStr)) {
+        qDebug() << "Receipt items participants table was not created.";
         qDebug() << query.lastError().text();
     }
 }
@@ -416,8 +429,10 @@ Utils::Result<qint32, QString> SqliteEventsRepository::createReceiptItem(
 {
     QSqlQuery query(m_db);
 
-    if (!query.prepare(R"(INSERT INTO receipt_items (receipt_id, name, price, count)
-                     VALUES (:receipt_id, :name, :price, :count))")) {
+    QString queryStr = QString(R"(INSERT INTO receipt_items (receipt_id, name, price, count)
+                                  VALUES (:receipt_id, :name, :price, :count))");
+
+    if (!query.prepare(queryStr)) {
         qDebug() << Q_FUNC_INFO << query.lastError().text();
         return QString("Не удалось создать запись в чеке.");
     }
@@ -520,6 +535,69 @@ Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteReceiptItem(qi
     }
 
     return Utils::Unit();
+}
+
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::createConsumer(
+    const Domain::Consumer &consumer)
+{
+    QSqlQuery query(m_db);
+
+    QString queryStr = QString(
+        R"(INSERT INTO receipt_items_participants (receipt_item_id, participant_id, consumption_ratio)
+           VALUES (:receipt_item_id, :participant_id, :consumption_ratio))");
+
+    if (!query.prepare(queryStr)) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать потребителей.");
+    }
+
+    query.bindValue(":receipt_item_id", consumer.receiptItemId());
+    query.bindValue(":participant_id", consumer.participantId());
+    query.bindValue(":consumption_ratio", consumer.consumptionRatio());
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать потребителя.");
+    }
+
+    return Utils::Unit();
+}
+
+Utils::Result<QVector<Domain::Consumer>, QString> SqliteEventsRepository::readConsumers(
+    qint32 receiptItemId)
+{
+    QVector<Domain::Consumer> consumers;
+
+    QSqlQuery query(m_db);
+
+    QString queryStr = QString(
+        R"(SELECT p.name, ric.*
+           FROM participants AS p
+           LEFT JOIN receipt_items_participants AS ric ON p.participant_id = ric.participant_id
+           WHERE ric.receipt_item_id = :receipt_item_id)");
+
+    if (!query.prepare(queryStr)) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить потребителей.");
+    }
+
+    query.bindValue(":receipt_item_id", receiptItemId);
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить потребителей.");
+    }
+
+    while (query.next()) {
+        Domain::Consumer consumer;
+        consumer.setName(query.value(0).toString());
+        consumer.setReceiptItemId(query.value(1).toInt());
+        consumer.setParticipantId(query.value(2).toInt());
+        consumer.setConsumptionRatio(query.value(3).toInt());
+        consumers.append(consumer);
+    }
+
+    return consumers;
 }
 
 } // namespace Infrastructure

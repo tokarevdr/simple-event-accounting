@@ -14,7 +14,7 @@ class ReceiptsViewModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    enum Role { IdRole, TitleRole, PurchaseDateRole, PurchaseTimeRole, BuyerNameRole };
+    enum Role { IdRole, TitleRole, PurchaseDateRole, PurchaseTimeRole, BuyerNameRole, BuyerIdRole };
 
     explicit ReceiptsViewModel(Application::IReceiptsRepository &repository,
                                QObject *parent = nullptr);

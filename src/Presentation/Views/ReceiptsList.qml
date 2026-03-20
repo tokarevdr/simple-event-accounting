@@ -6,6 +6,7 @@ Item {
     id: root
 
     property var receiptsViewModel: null
+    property var participantsViewModel: null
     property var formatDate: function (date) {
         return Qt.formatDate(date, "dd.MM.yyyy")
     }
@@ -118,6 +119,9 @@ Item {
                             editReceiptDialog.receiptTitle = titleRole
                             editReceiptDialog.purchaseDate = purchaseDateRole
                             editReceiptDialog.purchaseTime = purchaseTimeRole
+                            editReceiptDialog.buyerIndex
+                                    = participantsViewModel.participantIndexById(
+                                        buyerIdRole)
                             editReceiptDialog.open()
                         }
                     }

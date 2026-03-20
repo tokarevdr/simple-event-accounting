@@ -6,12 +6,14 @@ include(../../app.pri)
 CONFIG += c++17
 
 HEADERS += \
+    ViewModels/ConsumersViewModel.h \
     ViewModels/EventsViewModel.h \
     ViewModels/ParticipantsViewModel.h \
     ViewModels/ReceiptItemsViewModel.h \
     ViewModels/ReceiptsViewModel.h
 
 SOURCES += \
+        ViewModels/ConsumersViewModel.cpp \
         ViewModels/EventsViewModel.cpp \
         ViewModels/ParticipantsViewModel.cpp \
         ViewModels/ReceiptItemsViewModel.cpp \

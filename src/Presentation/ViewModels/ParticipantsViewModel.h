@@ -32,6 +32,8 @@ public:
 
     Q_INVOKABLE void deleteParticipant(int index);
 
+    Q_INVOKABLE int participantIndexById(int id) const;
+
 private:
     QVector<Domain::Participant> m_participants;
     Application::IParticipantsRepository &m_repository;

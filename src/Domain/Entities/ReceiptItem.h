@@ -2,7 +2,9 @@
 #define RECEIPTITEM_H
 
 #include <QString>
+#include <QVector>
 
+#include "Consumer.h"
 #include "Domain_global.h"
 
 namespace Sea {

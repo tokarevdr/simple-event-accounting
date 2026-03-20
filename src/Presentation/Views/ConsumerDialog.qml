@@ -1,0 +1,78 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+
+Dialog {
+    id: root
+
+    property alias consumerId: participantComboBox.currentValue
+    property alias consumerName: participantComboBox.currentText
+    property alias consumerIndex: participantComboBox.currentIndex
+    property alias consumptionRatio: consumptionRatioSpinBox.value
+
+    standardButtons: Dialog.Ok | Dialog.Cancel
+
+    GridLayout {
+        anchors.fill: parent
+
+        columns: 2
+
+        Label {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            text: "Потребитель:"
+        }
+
+        ComboBox {
+            id: participantComboBox
+
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            model: participantsProxyVm
+            textRole: "nameRole"
+            valueRole: "idRole"
+            editable: true
+        }
+
+        Label {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            text: "Доля:"
+        }
+
+        SpinBox {
+            id: consumptionRatioSpinBox
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            from: 1
+            to: 100
+        }
+    }
+
+    function clear() {
+        participantComboBox.currentIndex = -1
+        consumptionRatioSpinBox.value = 1
+    }
+
+    enter: Transition {
+        NumberAnimation {
+            property: "opacity"
+            from: 0.0
+            to: 1.0
+            duration: 100
+        }
+    }
+
+    exit: Transition {
+        NumberAnimation {
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: 100
+        }
+    }
+}

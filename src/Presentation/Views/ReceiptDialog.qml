@@ -12,6 +12,7 @@ Dialog {
     property alias purchaseTime: purchaseTimePicker.selectedTime
     property alias buyerId: buyerComboBox.currentValue
     property alias buyerName: buyerComboBox.currentText
+    property alias buyerIndex: buyerComboBox.currentIndex
 
     standardButtons: Dialog.Ok | Dialog.Cancel
 
