@@ -4,7 +4,6 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IEventsRepository.h"
-#include "Entities/Event.h"
 
 namespace Sea {
 namespace Presentation {

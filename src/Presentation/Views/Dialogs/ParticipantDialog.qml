@@ -2,7 +2,9 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-Dialog {
+import "../Controls"
+
+AnimatedDialog {
     id: root
 
     property alias participantName: nameTextField.text

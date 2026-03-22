@@ -2,14 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import "Controls"
+import "../Controls"
 
-Dialog {
+AnimatedDialog {
     id: root
 
-    property alias eventTitle: titleTextField.text
-    property alias eventStartDate: startDatePicker.selectedDate
-    property alias eventEndDate: endDatePicker.selectedDate
+    property alias receiptItemName: nameTextField.text
+    property alias receiptItemPrice: priceSpinBox.value
+    property alias receiptItemCount: countSpinBox.value
 
     standardButtons: Dialog.Ok | Dialog.Cancel
 
@@ -22,27 +22,27 @@ Dialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            text: "Название:"
+            text: "Наименование:"
         }
 
         TextField {
-            id: titleTextField
+            id: nameTextField
 
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            placeholderText: "Бухич"
+            placeholderText: "Колбаса"
         }
 
         Label {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            text: "Начало:"
+            text: "Цена:"
         }
 
-        DatePicker {
-            id: startDatePicker
+        SpinBox {
+            id: priceSpinBox
 
             Layout.fillHeight: true
             Layout.fillWidth: true
@@ -52,23 +52,21 @@ Dialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            text: "Конец:"
+            text: "Количество:"
         }
 
-        DatePicker {
-            id: endDatePicker
+        SpinBox {
+            id: countSpinBox
 
             Layout.fillHeight: true
             Layout.fillWidth: true
-
-            minimumDate: startDatePicker.selectedDate
         }
     }
 
     function clear() {
-        titleTextField.text = ""
-        startDatePicker.selectedDate = new Date()
-        endDatePicker.selectedDate = new Date()
+        nameTextField.text = ""
+        priceSpinBox.value = 0
+        countSpinBox.value = 1
     }
 
     enter: Transition {

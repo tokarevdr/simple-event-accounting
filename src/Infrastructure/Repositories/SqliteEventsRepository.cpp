@@ -50,6 +50,19 @@ SqliteEventsRepository::SqliteEventsRepository()
         qDebug() << query.lastError().text();
     }
 
+    queryStr = QString(R"(CREATE TABLE IF NOT EXISTS events_participants (
+                          event_id INTEGER NOT NULL,
+                          participant_id INTEGER NOT NULL,
+                          PRIMARY KEY (event_id, participant_id)
+                          FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
+                          FOREIGN KEY (participant_id) REFERENCES participants(participant_id) ON DELETE CASCADE)
+                        )");
+
+    if (!query.exec(queryStr)) {
+        qDebug() << "Events participants table was not created.";
+        qDebug() << query.lastError().text();
+    }
+
     queryStr = QString(R"(CREATE TABLE IF NOT EXISTS receipts (
                           receipt_id INTEGER NOT NULL,
                           event_id INTEGER NOT NULL,
@@ -214,6 +227,176 @@ Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteEvent(qint32 i
     return Utils::Unit();
 }
 
+Utils::Result<qint32, QString> SqliteEventsRepository::createParticipant(
+    const Domain::Participant &participant)
+{
+    QSqlQuery query(m_db);
+
+    if (!query.prepare(R"(INSERT INTO participants (name)
+                    VALUES (:name))")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать участника.");
+    }
+
+    query.bindValue(":name", participant.name());
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось создать участника.");
+    }
+
+    auto id = query.lastInsertId();
+
+    if (!id.isValid()) {
+        qDebug() << Q_FUNC_INFO << "Last insert id is invalid.";
+        return QString("Не удалось получить созданного участника.");
+    }
+
+    return query.lastInsertId().toInt();
+}
+
+Utils::Result<QVector<Domain::Participant>, QString> SqliteEventsRepository::readParticipants()
+{
+    QSqlQuery query(m_db);
+    QVector<Domain::Participant> participants;
+
+    if (!query.exec(R"(SELECT * FROM participants)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список участников.");
+    }
+
+    while (query.next()) {
+        Domain::Participant participant;
+        participant.setId(query.value(0).toInt());
+        participant.setName(query.value(1).toString());
+
+        participants.append(participant);
+    }
+
+    return participants;
+}
+
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::updateParticipant(
+    const Domain::Participant &participant)
+{
+    QSqlQuery query(m_db);
+
+    if (!query.prepare(
+            R"(UPDATE participants SET name = :name WHERE participant_id = :participant_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить данные участника.");
+    }
+
+    query.bindValue(":participant_id", participant.id());
+    query.bindValue(":name", participant.name());
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось обновить данные участника.");
+    }
+
+    return Utils::Unit();
+}
+
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteParticipant(qint32 id)
+{
+    QSqlQuery query(m_db);
+
+    if (!query.prepare(R"(DELETE FROM participants WHERE participant_id = :participant_id)")) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить участника.");
+    }
+
+    query.bindValue(":participant_id", id);
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить участника.");
+    }
+
+    return Utils::Unit();
+}
+
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::createEventParticipant(
+    qint32 eventId, qint32 participantId)
+{
+    QSqlQuery query(m_db);
+
+    QString queryStr = QString(R"(INSERT INTO events_participants (event_id, participant_id)
+                                  VALUES (:event_id, :participant_id))");
+
+    if (!query.prepare(queryStr)) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось добавить участника события.");
+    }
+
+    query.bindValue(":event_id", eventId);
+    query.bindValue(":participant_id", participantId);
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось добавить участника события.");
+    }
+
+    return Utils::Unit();
+}
+
+Utils::Result<QVector<Domain::Participant>, QString> SqliteEventsRepository::readEventParticipants(
+    qint32 eventId)
+{
+    QSqlQuery query(m_db);
+    QVector<Domain::Participant> participants;
+
+    QString queryStr = QString(R"(SELECT p.* FROM events_participants AS ep
+                                  LEFT JOIN participants AS p ON ep.participant_id = p.participant_id
+                                  WHERE event_id = :event_id)");
+
+    if (!query.prepare(queryStr)) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список участников.");
+    }
+
+    query.bindValue(":event_id", eventId);
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить список участников.");
+    }
+
+    while (query.next()) {
+        Domain::Participant participant;
+        participant.setId(query.value(0).toInt());
+        participant.setName(query.value(1).toString());
+
+        participants.append(participant);
+    }
+
+    return participants;
+}
+
+Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteEventParticipant(
+    qint32 participantId)
+{
+    QSqlQuery query(m_db);
+
+    QString queryStr = QString(R"(DELETE FROM events_participants
+                                  WHERE participant_id = :participant_id)");
+
+    if (!query.prepare(queryStr)) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить участника события.");
+    }
+
+    query.bindValue(":participant_id", participantId);
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось удалить участника события.");
+    }
+
+    return Utils::Unit();
+}
+
 Utils::Result<qint32, QString> SqliteEventsRepository::createReceipt(const Domain::Receipt &receipt)
 {
     QSqlQuery query(m_db);
@@ -329,96 +512,6 @@ Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteReceipt(qint32
     if (!query.exec()) {
         qDebug() << Q_FUNC_INFO << query.lastError().text();
         return QString("Не удалось обновить удалить чек.");
-    }
-
-    return Utils::Unit();
-}
-
-Utils::Result<qint32, QString> SqliteEventsRepository::createParticipant(
-    const Domain::Participant &participant)
-{
-    QSqlQuery query(m_db);
-
-    if (!query.prepare(R"(INSERT INTO participants (name)
-                    VALUES (:name))")) {
-        qDebug() << Q_FUNC_INFO << query.lastError().text();
-        return QString("Не удалось создать участника.");
-    }
-
-    query.bindValue(":name", participant.name());
-
-    if (!query.exec()) {
-        qDebug() << Q_FUNC_INFO << query.lastError().text();
-        return QString("Не удалось создать участника.");
-    }
-
-    auto id = query.lastInsertId();
-
-    if (!id.isValid()) {
-        qDebug() << Q_FUNC_INFO << "Last insert id is invalid.";
-        return QString("Не удалось получить созданного участника.");
-    }
-
-    return query.lastInsertId().toInt();
-}
-
-Utils::Result<QVector<Domain::Participant>, QString> SqliteEventsRepository::readParticipants()
-{
-    QSqlQuery query(m_db);
-    QVector<Domain::Participant> participants;
-
-    if (!query.exec(R"(SELECT * FROM participants)")) {
-        qDebug() << Q_FUNC_INFO << query.lastError().text();
-        return QString("Не удалось получить список участников.");
-    }
-
-    while (query.next()) {
-        Domain::Participant participant;
-        participant.setId(query.value(0).toInt());
-        participant.setName(query.value(1).toString());
-
-        participants.append(participant);
-    }
-
-    return participants;
-}
-
-Utils::Result<Utils::Unit, QString> SqliteEventsRepository::updateParticipant(
-    const Domain::Participant &participant)
-{
-    QSqlQuery query(m_db);
-
-    if (!query.prepare(
-            R"(UPDATE participants SET name = :name WHERE participant_id = :participant_id)")) {
-        qDebug() << Q_FUNC_INFO << query.lastError().text();
-        return QString("Не удалось обновить данные участника.");
-    }
-
-    query.bindValue(":participant_id", participant.id());
-    query.bindValue(":name", participant.name());
-
-    if (!query.exec()) {
-        qDebug() << Q_FUNC_INFO << query.lastError().text();
-        return QString("Не удалось обновить данные участника.");
-    }
-
-    return Utils::Unit();
-}
-
-Utils::Result<Utils::Unit, QString> SqliteEventsRepository::deleteParticipant(qint32 id)
-{
-    QSqlQuery query(m_db);
-
-    if (!query.prepare(R"(DELETE FROM participants WHERE participant_id = :participant_id)")) {
-        qDebug() << Q_FUNC_INFO << query.lastError().text();
-        return QString("Не удалось удалить участника.");
-    }
-
-    query.bindValue(":participant_id", id);
-
-    if (!query.exec()) {
-        qDebug() << Q_FUNC_INFO << query.lastError().text();
-        return QString("Не удалось удалить участника.");
     }
 
     return Utils::Unit();

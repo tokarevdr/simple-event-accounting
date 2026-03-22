@@ -29,6 +29,7 @@ ApplicationWindow {
                 eventsViewModel: eventsVm
 
                 onEventClicked: {
+                    eventParticipantsVm.setEventId(eventId)
                     receiptsVm.setEventId(eventId)
                     receiptItemsVm.setReceiptId(-1)
                     consumersVm.setReceiptItemId(-1)
@@ -48,6 +49,21 @@ ApplicationWindow {
                 anchors.fill: parent
                 anchors.margins: 5
                 participantsViewModel: participantsVm
+            }
+        }
+
+        Item {
+            id: eventParticipantsTab
+
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            EventParticipantsList {
+                id: eventParticipantsList
+
+                anchors.fill: parent
+                anchors.margins: 5
+                eventParticipantsViewModel: eventParticipantsVm
             }
         }
 

@@ -4,7 +4,6 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IReceiptsRepository.h"
-#include "Entities/Receipt.h"
 
 namespace Sea {
 namespace Presentation {

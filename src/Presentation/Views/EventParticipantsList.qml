@@ -7,7 +7,7 @@ import "Dialogs"
 Item {
     id: root
 
-    property var participantsViewModel: null
+    property var eventParticipantsViewModel: null
 
     ColumnLayout {
         anchors.fill: root
@@ -16,25 +16,25 @@ Item {
             Layout.preferredHeight: 50
             Layout.preferredWidth: 100
 
-            text: "Create"
+            text: "Add"
 
             onClicked: {
-                createParticipantDialog.clear()
-                createParticipantDialog.open()
+                addEventParticipantDialog.clear()
+                addEventParticipantDialog.open()
             }
         }
 
         ListView {
-            id: participantsListView
+            id: eventParticipantsListView
 
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: participantsViewModel
+            model: eventParticipantsViewModel
 
             delegate: Item {
-                height: participantsListView.height / 10
-                width: participantsListView.width
+                height: eventParticipantsListView.height / 10
+                width: eventParticipantsListView.width
                 RowLayout {
                     anchors.fill: parent
 
@@ -58,44 +58,29 @@ Item {
 
                             text: "..."
 
-                            onClicked: participantMenu.open()
+                            onClicked: eventParticipantMenu.open()
                         }
                     }
                 }
 
                 Menu {
-                    id: participantMenu
-
-                    MenuItem {
-                        text: "Edit"
-
-                        onTriggered: {
-                            editParticipantDialog.participantName = nameRole
-                            editParticipantDialog.open()
-                        }
-                    }
+                    id: eventParticipantMenu
 
                     MenuItem {
                         text: "Delete"
 
-                        onTriggered: participantsViewModel.deleteParticipant(
+                        onTriggered: eventParticipantsViewModel.deleteEventParticipant(
                                          index)
                     }
-                }
-
-                ParticipantDialog {
-                    id: editParticipantDialog
-
-                    onAccepted: participantsViewModel.updateParticipant(
-                                    index, participantName)
                 }
             }
         }
     }
 
-    ParticipantDialog {
-        id: createParticipantDialog
+    EventParticipantDialog {
+        id: addEventParticipantDialog
 
-        onAccepted: participantsViewModel.createParticipant(participantName)
+        onAccepted: eventParticipantsViewModel.createEventParticipant(
+                        participantId, participantName)
     }
 }

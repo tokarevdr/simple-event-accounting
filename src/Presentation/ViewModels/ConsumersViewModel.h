@@ -4,7 +4,6 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IConsumersRepository.h"
-#include "Entities/Consumer.h"
 
 namespace Sea {
 namespace Presentation {

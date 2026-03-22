@@ -14,6 +14,7 @@ CONFIG += c++17
 
 SOURCES += \
     Abstractions/IConsumersRepository.cpp \
+    Abstractions/IEventParticipantsRepository.cpp \
     Abstractions/IEventsRepository.cpp \
     Abstractions/IParticipantsRepository.cpp \
     Abstractions/IReceiptItemsRepository.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 
 HEADERS += \
     Abstractions/IConsumersRepository.h \
+    Abstractions/IEventParticipantsRepository.h \
     Abstractions/IEventsRepository.h \
     Abstractions/IParticipantsRepository.h \
     Abstractions/IReceiptItemsRepository.h \

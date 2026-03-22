@@ -2,7 +2,9 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-Dialog {
+import "../Controls"
+
+AnimatedDialog {
     id: root
 
     property alias consumerId: participantComboBox.currentValue
@@ -30,7 +32,7 @@ Dialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: participantsProxyVm
+            model: eventParticipantsProxyVm
             textRole: "nameRole"
             valueRole: "idRole"
             editable: true
@@ -56,23 +58,5 @@ Dialog {
     function clear() {
         participantComboBox.currentIndex = -1
         consumptionRatioSpinBox.value = 1
-    }
-
-    enter: Transition {
-        NumberAnimation {
-            property: "opacity"
-            from: 0.0
-            to: 1.0
-            duration: 100
-        }
-    }
-
-    exit: Transition {
-        NumberAnimation {
-            property: "opacity"
-            from: 1.0
-            to: 0.0
-            duration: 100
-        }
     }
 }

@@ -7,6 +7,7 @@ CONFIG += c++17
 
 HEADERS += \
     ViewModels/ConsumersViewModel.h \
+    ViewModels/EventParticipantsViewModel.h \
     ViewModels/EventsViewModel.h \
     ViewModels/ParticipantsViewModel.h \
     ViewModels/ReceiptItemsViewModel.h \
@@ -14,6 +15,7 @@ HEADERS += \
 
 SOURCES += \
         ViewModels/ConsumersViewModel.cpp \
+        ViewModels/EventParticipantsViewModel.cpp \
         ViewModels/EventsViewModel.cpp \
         ViewModels/ParticipantsViewModel.cpp \
         ViewModels/ReceiptItemsViewModel.cpp \

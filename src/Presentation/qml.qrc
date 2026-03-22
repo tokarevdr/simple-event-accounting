@@ -2,16 +2,20 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Views/EventsList.qml</file>
-        <file>Views/EventDialog.qml</file>
         <file>Views/Controls/DatePicker.qml</file>
         <file>Views/ParticipantsList.qml</file>
-        <file>Views/ParticipantDialog.qml</file>
-        <file>Views/ReceiptDialog.qml</file>
         <file>Views/Controls/TimePicker.qml</file>
         <file>Views/ReceiptsList.qml</file>
         <file>Views/ReceiptItemsList.qml</file>
-        <file>Views/ReceiptItemDialog.qml</file>
         <file>Views/ConsumersList.qml</file>
-        <file>Views/ConsumerDialog.qml</file>
+        <file>Views/Controls/NavigationController.qml</file>
+        <file>Views/Dialogs/ConsumerDialog.qml</file>
+        <file>Views/Dialogs/EventDialog.qml</file>
+        <file>Views/Dialogs/ParticipantDialog.qml</file>
+        <file>Views/Dialogs/ReceiptDialog.qml</file>
+        <file>Views/Dialogs/ReceiptItemDialog.qml</file>
+        <file>Views/Dialogs/EventParticipantDialog.qml</file>
+        <file>Views/Dialogs/AnimatedDialog.qml</file>
+        <file>Views/EventParticipantsList.qml</file>
     </qresource>
 </RCC>

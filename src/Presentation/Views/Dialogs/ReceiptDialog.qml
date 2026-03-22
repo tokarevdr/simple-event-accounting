@@ -2,9 +2,9 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
-import "Controls"
+import "../Controls"
 
-Dialog {
+AnimatedDialog {
     id: root
 
     property alias receiptTitle: titleTextField.text
@@ -78,7 +78,7 @@ Dialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: participantsProxyVm
+            model: eventParticipantsProxyVm
             textRole: "nameRole"
             valueRole: "idRole"
             editable: true
