@@ -2,6 +2,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 #include <QSortFilterProxyModel>
 
 #include "Repositories/SqliteAccountingRepository.h"
@@ -42,6 +43,8 @@ int main(
     participantsProxyViewModel.setSourceModel(&participantsViewModel);
     participantsProxyViewModel.setFilterRole(Sea::Presentation::UsersViewModel::NameRole);
     participantsProxyViewModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    QQuickStyle::setStyle("Fusion");
 
     QQmlApplicationEngine engine;
 

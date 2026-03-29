@@ -1,4 +1,4 @@
-QT += quick sql concurrent
+QT += quick sql concurrent quickcontrols2
 
 include(../../common.pri)
 include(../../app.pri)

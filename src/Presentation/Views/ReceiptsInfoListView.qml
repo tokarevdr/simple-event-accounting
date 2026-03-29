@@ -21,9 +21,6 @@ Item {
         anchors.fill: root
 
         Button {
-            Layout.preferredHeight: 50
-            Layout.preferredWidth: 100
-
             text: "Create"
 
             onClicked: {

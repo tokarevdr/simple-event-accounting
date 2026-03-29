@@ -13,9 +13,6 @@ Item {
         anchors.fill: root
 
         Button {
-            Layout.preferredHeight: 50
-            Layout.preferredWidth: 100
-
             text: "Create"
 
             onClicked: {
@@ -70,7 +67,7 @@ Item {
                         text: "Edit"
 
                         onTriggered: {
-                            editUserDialog.participantName = nameRole
+                            editUserDialog.userName = nameRole
                             editUserDialog.open()
                         }
                     }

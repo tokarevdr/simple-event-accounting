@@ -8,7 +8,7 @@ import "Views/Controls"
 
 ApplicationWindow {
        id: window
-       width: 1600
+       width: 600
        height: 800
        visible: true
        title: qsTr("Hello World")
@@ -17,52 +17,80 @@ ApplicationWindow {
               id: navigationController
        }
 
-       header: TabBar {
-              id: tabBar
-              TabButton {
-                     text: "События"
-              }
-
-              TabButton {
-                     text: "Люди"
-              }
-       }
-
-       StackLayout {
+       RowLayout {
               anchors.fill: parent
 
-              currentIndex: tabBar.currentIndex
+              ColumnLayout {
+                     id: sideBar
+                     Layout.fillHeight: true
+                     Layout.preferredWidth: 50
+                     Layout.maximumWidth: 50
 
-              Item {
-                     StackLayout {
-                            id: stackLayout
-                            anchors.fill: parent
-                            currentIndex: navigationController.currentView
+                     property int currentIndex: 0
+                     spacing: 0
 
-                            EventsInfoListView {
-                                   eventsInfoViewModel: eventsInfoVm
-                                   onEventSelected: navigationController.currentView = NavigationController.Event
-                            }
+                     Button {
+                            Layout.preferredHeight: 50
+                            Layout.fillWidth: true
+                            text: "С"
 
-                            EventView {
-                                   eventViewModel: eventVm
-                                   navController: navigationController
-                            }
+                            checked: sideBar.currentIndex === 0
 
-                            ReceiptView {
-                                   receiptViewModel : receiptVm
-                                   navController: navigationController
-                            }
+                            onClicked: sideBar.currentIndex = 0
+                     }
 
-                            ReceiptItemView {
-                                   consumersViewModel: consumersVm
-                                   navController: navigationController
-                            }
+                     Button {
+                            Layout.preferredHeight: 50
+                            Layout.fillWidth: true
+                            text: "Л"
+
+                            checked: sideBar.currentIndex === 1
+
+                            onClicked: sideBar.currentIndex = 1
+                     }
+
+                     Item {
+                            Layout.fillHeight: true
                      }
               }
 
-              UsersListView {
-                     usersViewModel: usersVm
+              StackLayout {
+                     Layout.fillHeight: true
+                     Layout.fillWidth: true
+
+                     currentIndex: sideBar.currentIndex
+
+                     Item {
+                            StackLayout {
+                                   id: stackLayout
+                                   anchors.fill: parent
+                                   currentIndex: navigationController.currentView
+
+                                   EventsInfoListView {
+                                          eventsInfoViewModel: eventsInfoVm
+                                          onEventSelected: navigationController.currentView = NavigationController.Event
+                                   }
+
+                                   EventView {
+                                          eventViewModel: eventVm
+                                          navController: navigationController
+                                   }
+
+                                   ReceiptView {
+                                          receiptViewModel : receiptVm
+                                          navController: navigationController
+                                   }
+
+                                   ReceiptItemView {
+                                          consumersViewModel: consumersVm
+                                          navController: navigationController
+                                   }
+                            }
+                     }
+
+                     UsersListView {
+                            usersViewModel: usersVm
+                     }
               }
        }
 }
