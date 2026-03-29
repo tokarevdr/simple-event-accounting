@@ -5,59 +5,24 @@ namespace Domain {
 
 ReceiptItem::ReceiptItem() {}
 
-qint32 ReceiptItem::id() const
+ReceiptItemInfo ReceiptItem::info() const
 {
-    return m_id;
+    return m_info;
 }
 
-void ReceiptItem::setId(
-    qint32 newId)
+void ReceiptItem::setInfo(const ReceiptItemInfo &newInfo)
 {
-    m_id = newId;
+    m_info = newInfo;
 }
 
-qint32 ReceiptItem::receiptId() const
+QVector<Consumer> ReceiptItem::consumers() const
 {
-    return m_receiptId;
+    return m_consumers;
 }
 
-void ReceiptItem::setReceiptId(
-    qint32 newReceiptId)
+void ReceiptItem::setConsumers(const QVector<Consumer> &newConsumers)
 {
-    m_receiptId = newReceiptId;
-}
-
-QString ReceiptItem::name() const
-{
-    return m_name;
-}
-
-void ReceiptItem::setName(
-    const QString &newName)
-{
-    m_name = newName;
-}
-
-qint32 ReceiptItem::price() const
-{
-    return m_price;
-}
-
-void ReceiptItem::setPrice(
-    qint32 newPrice)
-{
-    m_price = newPrice;
-}
-
-qint32 ReceiptItem::count() const
-{
-    return m_count;
-}
-
-void ReceiptItem::setCount(
-    qint32 newCount)
-{
-    m_count = newCount;
+    m_consumers = newConsumers;
 }
 
 } // namespace Domain

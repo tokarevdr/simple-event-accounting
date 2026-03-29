@@ -25,7 +25,7 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE void setReceiptItemId(qint32 id);
+    void setReceiptItemId(qint32 id);
 
     Q_INVOKABLE void createConsumer(qint32 participantId,
                                     const QString &name,

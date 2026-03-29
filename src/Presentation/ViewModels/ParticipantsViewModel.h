@@ -3,11 +3,10 @@
 
 #include <QAbstractListModel>
 
-#include "Abstractions/IParticipantsRepository.h"
+#include "Abstractions/IEventUsersRepository.h"
 
 namespace Sea {
 namespace Presentation {
-
 class ParticipantsViewModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -15,7 +14,7 @@ class ParticipantsViewModel : public QAbstractListModel
 public:
     enum Role { IdRole, NameRole };
 
-    explicit ParticipantsViewModel(Application::IParticipantsRepository &repository,
+    explicit ParticipantsViewModel(Application::IEventUsersRepository &repository,
                                    QObject *parent = nullptr);
 
     // Basic functionality:
@@ -25,17 +24,16 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE void createParticipant(const QString &name);
+    void setEventId(qint32 id);
 
-    Q_INVOKABLE void updateParticipant(int index, const QString &name);
+    Q_INVOKABLE void createParticipant(qint32 userId, const QString &name);
 
     Q_INVOKABLE void deleteParticipant(int index);
 
-    Q_INVOKABLE int participantIndexById(int id) const;
-
 private:
-    QVector<Domain::Participant> m_participants;
-    Application::IParticipantsRepository &m_repository;
+    qint32 m_eventId = -1;
+    QVector<Domain::User> m_participants;
+    Application::IEventUsersRepository &m_repository;
 };
 
 } // namespace Presentation

@@ -1,12 +1,12 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <optional>
-
-#include <QDate>
-#include <QString>
+#include <QVector>
 
 #include "Domain_global.h"
+#include "EventInfo.h"
+#include "Receipt.h"
+#include "User.h"
 
 namespace Sea {
 namespace Domain {
@@ -16,20 +16,17 @@ class DOMAIN_EXPORT Event
 public:
     Event();
 
-    qint32 id() const;
-    void setId(qint32 newId);
-    QString title() const;
-    void setTitle(const QString &newTitle);
-    std::optional<QDate> startDate() const;
-    void setStartDate(std::optional<QDate> newStartDate);
-    std::optional<QDate> endDate() const;
-    void setEndDate(std::optional<QDate> newEndDate);
+    EventInfo info() const;
+    void setInfo(const EventInfo &newInfo);
+    QVector<User> participants() const;
+    void setParticipants(const QVector<User> &newParticipants);
+    QVector<Receipt> receipts() const;
+    void setReceipts(const QVector<Receipt> &newReceipts);
 
 private:
-    qint32 m_id = 0;
-    QString m_title;
-    std::optional<QDate> m_startDate = std::nullopt;
-    std::optional<QDate> m_endDate = std::nullopt;
+    EventInfo m_info;
+    QVector<User> m_participants;
+    QVector<Receipt> m_receipts;
 };
 
 } // namespace Domain

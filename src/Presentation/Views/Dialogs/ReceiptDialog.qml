@@ -78,7 +78,7 @@ AnimatedDialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: eventParticipantsProxyVm
+            model: participantsProxyVm
             textRole: "nameRole"
             valueRole: "idRole"
             editable: true

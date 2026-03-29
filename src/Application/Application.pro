@@ -14,19 +14,19 @@ CONFIG += c++17
 
 SOURCES += \
     Abstractions/IConsumersRepository.cpp \
-    Abstractions/IEventParticipantsRepository.cpp \
-    Abstractions/IEventsRepository.cpp \
-    Abstractions/IParticipantsRepository.cpp \
-    Abstractions/IReceiptItemsRepository.cpp \
-    Abstractions/IReceiptsRepository.cpp
+    Abstractions/IEventUsersRepository.cpp \
+    Abstractions/IEventsInfoRepository.cpp \
+    Abstractions/IReceiptItemsInfoRepository.cpp \
+    Abstractions/IReceiptsInfoRepository.cpp \
+    Abstractions/IUsersRepository.cpp
 
 HEADERS += \
     Abstractions/IConsumersRepository.h \
-    Abstractions/IEventParticipantsRepository.h \
-    Abstractions/IEventsRepository.h \
-    Abstractions/IParticipantsRepository.h \
-    Abstractions/IReceiptItemsRepository.h \
-    Abstractions/IReceiptsRepository.h \
+    Abstractions/IEventUsersRepository.h \
+    Abstractions/IEventsInfoRepository.h \
+    Abstractions/IReceiptItemsInfoRepository.h \
+    Abstractions/IReceiptsInfoRepository.h \
+    Abstractions/IUsersRepository.h \
     Application_global.h
 
 # Default rules for deployment.

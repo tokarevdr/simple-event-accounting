@@ -15,17 +15,23 @@ CONFIG += c++17
 SOURCES += \
     Entities/Consumer.cpp \
     Entities/Event.cpp \
-    Entities/Participant.cpp \
+    Entities/EventInfo.cpp \
     Entities/Receipt.cpp \
-    Entities/ReceiptItem.cpp
+    Entities/ReceiptInfo.cpp \
+    Entities/ReceiptItem.cpp \
+    Entities/ReceiptItemInfo.cpp \
+    Entities/User.cpp
 
 HEADERS += \
     Domain_global.h \
     Entities/Consumer.h \
     Entities/Event.h \
-    Entities/Participant.h \
+    Entities/EventInfo.h \
     Entities/Receipt.h \
-    Entities/ReceiptItem.h
+    Entities/ReceiptInfo.h \
+    Entities/ReceiptItem.h \
+    Entities/ReceiptItemInfo.h \
+    Entities/User.h
 
 # Default rules for deployment.
 unix {

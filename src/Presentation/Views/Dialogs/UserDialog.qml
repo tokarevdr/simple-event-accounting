@@ -2,11 +2,12 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import "../Controls"
+
 AnimatedDialog {
     id: root
 
-    property alias participantName: userComboBox.currentText
-    property alias participantId: userComboBox.currentValue
+    property alias userName: nameTextField.text
 
     standardButtons: Dialog.Ok | Dialog.Cancel
 
@@ -19,23 +20,20 @@ AnimatedDialog {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            text: "Участник:"
+            text: "Имя:"
         }
 
-        ComboBox {
-            id: userComboBox
+        TextField {
+            id: nameTextField
 
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: usersProxyVm
-            textRole: "nameRole"
-            valueRole: "idRole"
-            editable: true
+            placeholderText: "Иван Иванов"
         }
     }
 
     function clear() {
-        userComboBox.currentIndex = -1
+        nameTextField.text = ""
     }
 }

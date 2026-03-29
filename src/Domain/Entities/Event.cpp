@@ -5,48 +5,34 @@ namespace Domain {
 
 Event::Event() {}
 
-qint32 Event::id() const
+EventInfo Event::info() const
 {
-    return m_id;
+    return m_info;
 }
 
-void Event::setId(
-    qint32 newId)
+void Event::setInfo(const EventInfo &newInfo)
 {
-    m_id = newId;
+    m_info = newInfo;
 }
 
-QString Event::title() const
+QVector<User> Event::participants() const
 {
-    return m_title;
+    return m_participants;
 }
 
-void Event::setTitle(
-    const QString &newTitle)
+void Event::setParticipants(const QVector<User> &newParticipants)
 {
-    m_title = newTitle;
+    m_participants = newParticipants;
 }
 
-std::optional<QDate> Event::startDate() const
+QVector<Receipt> Event::receipts() const
 {
-    return m_startDate;
+    return m_receipts;
 }
 
-void Event::setStartDate(
-    std::optional<QDate> newStartDate)
+void Event::setReceipts(const QVector<Receipt> &newReceipts)
 {
-    m_startDate = newStartDate;
-}
-
-std::optional<QDate> Event::endDate() const
-{
-    return m_endDate;
-}
-
-void Event::setEndDate(
-    std::optional<QDate> newEndDate)
-{
-    m_endDate = newEndDate;
+    m_receipts = newReceipts;
 }
 
 } // namespace Domain

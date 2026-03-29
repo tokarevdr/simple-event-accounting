@@ -7,19 +7,25 @@ CONFIG += c++17
 
 HEADERS += \
     ViewModels/ConsumersViewModel.h \
-    ViewModels/EventParticipantsViewModel.h \
-    ViewModels/EventsViewModel.h \
+    ViewModels/EventViewModel.h \
+    ViewModels/EventsInfoViewModel.h \
     ViewModels/ParticipantsViewModel.h \
-    ViewModels/ReceiptItemsViewModel.h \
-    ViewModels/ReceiptsViewModel.h
+    ViewModels/ReceiptItemViewModel.h \
+    ViewModels/ReceiptItemsInfoViewModel.h \
+    ViewModels/ReceiptViewModel.h \
+    ViewModels/ReceiptsInfoViewModel.h \
+    ViewModels/UsersViewModel.h
 
 SOURCES += \
         ViewModels/ConsumersViewModel.cpp \
-        ViewModels/EventParticipantsViewModel.cpp \
-        ViewModels/EventsViewModel.cpp \
+        ViewModels/EventViewModel.cpp \
+        ViewModels/EventsInfoViewModel.cpp \
         ViewModels/ParticipantsViewModel.cpp \
-        ViewModels/ReceiptItemsViewModel.cpp \
-        ViewModels/ReceiptsViewModel.cpp \
+        ViewModels/ReceiptItemViewModel.cpp \
+        ViewModels/ReceiptItemsInfoViewModel.cpp \
+        ViewModels/ReceiptViewModel.cpp \
+        ViewModels/ReceiptsInfoViewModel.cpp \
+        ViewModels/UsersViewModel.cpp \
         main.cpp
 
 RESOURCES += qml.qrc

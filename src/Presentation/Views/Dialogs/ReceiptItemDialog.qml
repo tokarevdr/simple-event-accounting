@@ -68,22 +68,4 @@ AnimatedDialog {
         priceSpinBox.value = 0
         countSpinBox.value = 1
     }
-
-    enter: Transition {
-        NumberAnimation {
-            property: "opacity"
-            from: 0.0
-            to: 1.0
-            duration: 100
-        }
-    }
-
-    exit: Transition {
-        NumberAnimation {
-            property: "opacity"
-            from: 1.0
-            to: 0.0
-            duration: 100
-        }
-    }
 }

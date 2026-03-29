@@ -5,23 +5,14 @@
 namespace Sea {
 namespace Presentation {
 
-ParticipantsViewModel::ParticipantsViewModel(Application::IParticipantsRepository &repository,
-                                             QObject *parent)
+ParticipantsViewModel::ParticipantsViewModel(
+    Application::IEventUsersRepository &repository, QObject *parent)
     : QAbstractListModel(parent)
     , m_repository{repository}
-{
-    auto result = m_repository.readParticipants();
+{}
 
-    if (!result.isOk()) {
-        qDebug() << result.error();
-    } else {
-        beginResetModel();
-        m_participants = result.value();
-        endResetModel();
-    }
-}
-
-int ParticipantsViewModel::rowCount(const QModelIndex &parent) const
+int ParticipantsViewModel::rowCount(
+    const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
@@ -29,7 +20,8 @@ int ParticipantsViewModel::rowCount(const QModelIndex &parent) const
     return m_participants.count();
 }
 
-QVariant ParticipantsViewModel::data(const QModelIndex &index, int role) const
+QVariant ParticipantsViewModel::data(
+    const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -56,58 +48,56 @@ QHash<int, QByteArray> ParticipantsViewModel::roleNames() const
     return names;
 }
 
-void ParticipantsViewModel::createParticipant(const QString &name)
+void ParticipantsViewModel::setEventId(qint32 id)
 {
-    if (name.isEmpty()) {
-        qDebug() << "Name should not be empty.";
+    if (id == m_eventId) {
         return;
     }
 
-    Domain::Participant participant;
-    participant.setName(name);
+    m_eventId = id;
 
-    auto result = m_repository.createParticipant(participant);
+    if (id == -1) {
+        beginResetModel();
+        m_participants.clear();
+        endResetModel();
+        return;
+    }
+
+    auto result = m_repository.readEventUsers(id);
 
     if (!result.isOk()) {
         qDebug() << result.error();
         return;
     }
 
-    participant.setId(result.value());
-
-    beginInsertRows(QModelIndex(), m_participants.count(), m_participants.count());
-    m_participants.append(participant);
-    endInsertRows();
+    beginResetModel();
+    m_participants = result.value();
+    endResetModel();
 }
 
-void ParticipantsViewModel::updateParticipant(int index, const QString &name)
+void ParticipantsViewModel::createParticipant(qint32 userId, const QString &name)
 {
-    if (name.isEmpty()) {
-        qDebug() << "Name should not be empty.";
-        return;
-    }
+    Domain::User user;
+    user.setId(userId);
+    user.setName(name);
 
-    Domain::Participant participant = m_participants[index];
-    participant.setName(name);
-
-    auto result = m_repository.updateParticipant(participant);
+    auto result = m_repository.createEventUser(m_eventId, userId);
 
     if (!result.isOk()) {
         qDebug() << result.error();
         return;
     }
 
-    QModelIndex modelIndex = QAbstractListModel::index(index);
-
-    m_participants.replace(index, participant);
-    dataChanged(modelIndex, modelIndex);
+    beginInsertRows(QModelIndex(), m_participants.count(), m_participants.count());
+    m_participants.append(user);
+    endInsertRows();
 }
 
 void ParticipantsViewModel::deleteParticipant(int index)
 {
     qint32 id = m_participants[index].id();
 
-    auto result = m_repository.deleteParticipant(id);
+    auto result = m_repository.deleteEventUser(id);
 
     if (!result.isOk()) {
         qDebug() << result.error();
@@ -117,14 +107,6 @@ void ParticipantsViewModel::deleteParticipant(int index)
     beginRemoveRows(QModelIndex(), index, index);
     m_participants.removeAt(index);
     endRemoveRows();
-}
-
-int ParticipantsViewModel::participantIndexById(int id) const
-{
-    Domain::Participant participant;
-    participant.setId(id);
-
-    return m_participants.indexOf(participant);
 }
 
 } // namespace Presentation

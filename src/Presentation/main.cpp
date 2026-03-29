@@ -4,13 +4,13 @@
 #include <QQmlContext>
 #include <QSortFilterProxyModel>
 
-#include "Repositories/SqliteEventsRepository.h"
+#include "Repositories/SqliteAccountingRepository.h"
 #include "ViewModels/ConsumersViewModel.h"
-#include "ViewModels/EventParticipantsViewModel.h"
-#include "ViewModels/EventsViewModel.h"
 #include "ViewModels/ParticipantsViewModel.h"
-#include "ViewModels/ReceiptItemsViewModel.h"
-#include "ViewModels/ReceiptsViewModel.h"
+#include "ViewModels/EventsInfoViewModel.h"
+#include "ViewModels/UsersViewModel.h"
+#include "ViewModels/ReceiptItemsInfoViewModel.h"
+#include "ViewModels/ReceiptsInfoViewModel.h"
 
 int main(
     int argc, char *argv[])
@@ -20,37 +20,42 @@ int main(
 #endif
     QGuiApplication app(argc, argv);
 
-    Sea::Infrastructure::SqliteEventsRepository repo;
-    Sea::Presentation::EventsViewModel eventsViewModel(repo);
+    Sea::Infrastructure::SqliteAccountingRepository repo;
+
+    Sea::Presentation::ConsumersViewModel consumersViewModel(repo);
+    Sea::Presentation::ReceiptItemViewModel receiptItemViewModel(consumersViewModel);
+    Sea::Presentation::ReceiptItemsInfoViewModel receiptItemsInfoViewModel(receiptItemViewModel,
+                                                                           repo);
+    Sea::Presentation::ReceiptViewModel receiptViewModel(receiptItemsInfoViewModel);
+    Sea::Presentation::ReceiptsInfoViewModel receiptsInfoViewModel(receiptViewModel, repo);
     Sea::Presentation::ParticipantsViewModel participantsViewModel(repo);
-    Sea::Presentation::ReceiptsViewModel receiptsViewModel(repo);
-    Sea::Presentation::ReceiptItemsViewModel receiptItemsViewModel(repo);
-    Sea::Presentation::EventParticipantsViewModel eventParticipantsViewModel(repo);
+    Sea::Presentation::EventViewModel eventViewModel(participantsViewModel, receiptsInfoViewModel);
+    Sea::Presentation::EventsInfoViewModel eventsInfoViewModel(eventViewModel, repo);
+    Sea::Presentation::UsersViewModel usersViewModel(repo);
+
+    QSortFilterProxyModel usersProxyViewModel;
+    usersProxyViewModel.setSourceModel(&usersViewModel);
+    usersProxyViewModel.setFilterRole(Sea::Presentation::UsersViewModel::NameRole);
+    usersProxyViewModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
 
     QSortFilterProxyModel participantsProxyViewModel;
     participantsProxyViewModel.setSourceModel(&participantsViewModel);
-    participantsProxyViewModel.setFilterRole(Sea::Presentation::ParticipantsViewModel::NameRole);
+    participantsProxyViewModel.setFilterRole(Sea::Presentation::UsersViewModel::NameRole);
     participantsProxyViewModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
-
-    QSortFilterProxyModel eventParticipantsProxyViewModel;
-    eventParticipantsProxyViewModel.setSourceModel(&eventParticipantsViewModel);
-    eventParticipantsProxyViewModel.setFilterRole(
-        Sea::Presentation::ParticipantsViewModel::NameRole);
-    eventParticipantsProxyViewModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
-
-    Sea::Presentation::ConsumersViewModel consumersViewModel(repo);
 
     QQmlApplicationEngine engine;
 
-    engine.rootContext()->setContextProperty("eventsVm", &eventsViewModel);
+    engine.rootContext()->setContextProperty("eventsInfoVm", &eventsInfoViewModel);
+    engine.rootContext()->setContextProperty("usersVm", &usersViewModel);
+    engine.rootContext()->setContextProperty("usersProxyVm", &usersProxyViewModel);
+    engine.rootContext()->setContextProperty("eventVm", &eventViewModel);
     engine.rootContext()->setContextProperty("participantsVm", &participantsViewModel);
     engine.rootContext()->setContextProperty("participantsProxyVm", &participantsProxyViewModel);
-    engine.rootContext()->setContextProperty("receiptsVm", &receiptsViewModel);
-    engine.rootContext()->setContextProperty("receiptItemsVm", &receiptItemsViewModel);
+    engine.rootContext()->setContextProperty("receiptsInfoVm", &receiptsInfoViewModel);
+    engine.rootContext()->setContextProperty("receiptVm", &receiptViewModel);
+    engine.rootContext()->setContextProperty("receiptItemsInfoVm", &receiptItemsInfoViewModel);
+    engine.rootContext()->setContextProperty("receiptItemVm", &receiptItemViewModel);
     engine.rootContext()->setContextProperty("consumersVm", &consumersViewModel);
-    engine.rootContext()->setContextProperty("eventParticipantsVm", &eventParticipantsViewModel);
-    engine.rootContext()->setContextProperty("eventParticipantsProxyVm",
-                                             &eventParticipantsProxyViewModel);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(
