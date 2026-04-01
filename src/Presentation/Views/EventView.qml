@@ -37,16 +37,7 @@ Item {
 
             currentIndex: tabBar.currentIndex
 
-            ParticipantsListView {
-                participantsViewModel: participantsVm
-            }
 
-            ReceiptsInfoListView {
-                receiptsInfoViewModel: receiptsInfoVm
-                participantsViewModel: participantsVm
-
-                onReceiptSelected: navController.currentView = NavigationController.Receipt
-            }
         }
 
         TabBar {

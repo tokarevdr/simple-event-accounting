@@ -9,6 +9,9 @@ Item {
 
     property var receiptsInfoViewModel: null
     property var participantsViewModel: null
+    property var receiptItemsInfoViewModel: null
+    property var consumersViewModel: null
+
     property var formatDate: function (date) {
         return Qt.formatDate(date, "dd.MM.yyyy")
     }
@@ -38,7 +41,7 @@ Item {
             model: receiptsInfoViewModel
 
             delegate: Item {
-                height: receiptsListView.height / 10
+                height: receiptsListView.currentIndex === index ? 500 : 40
                 width: receiptsListView.width
 
                 MouseArea {
@@ -46,68 +49,86 @@ Item {
 
                     onClicked: {
                         receiptsInfoViewModel.selectReceipt(index)
+                        receiptsListView.currentIndex = index
                         root.receiptSelected()
                     }
                 }
 
-                RowLayout {
+                ColumnLayout {
                     anchors.fill: parent
 
-                    Item {
-                        Layout.fillHeight: true
+                    RowLayout {
+                        Layout.preferredHeight: 40
+                        Layout.maximumHeight: 40
                         Layout.fillWidth: true
 
-                        Text {
-                            anchors.fill: parent
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
 
-                            text: titleRole
+                            Text {
+                                anchors.fill: parent
+
+                                text: titleRole
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+
+                            Text {
+                                anchors.fill: parent
+
+                                text: root.formatDate(purchaseDateRole)
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+
+                            Text {
+                                anchors.fill: parent
+
+                                text: root.formatTime(purchaseTimeRole)
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+
+                            Text {
+                                anchors.fill: parent
+
+                                text: buyerNameRole
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 50
+
+                            Button {
+                                anchors.fill: parent
+
+                                text: "..."
+
+                                onClicked: receiptsMenu.open()
+                            }
                         }
                     }
 
-                    Item {
+                    ReceiptItemsInfoListView {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
 
-                        Text {
-                            anchors.fill: parent
+                        visible: receiptsListView.currentIndex === index
 
-                            text: root.formatDate(purchaseDateRole)
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-
-                        Text {
-                            anchors.fill: parent
-
-                            text: root.formatTime(purchaseTimeRole)
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-
-                        Text {
-                            anchors.fill: parent
-
-                            text: buyerNameRole
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        Layout.preferredWidth: 50
-
-                        Button {
-                            anchors.fill: parent
-
-                            text: "..."
-
-                            onClicked: receiptsMenu.open()
-                        }
+                        receiptItemsInfoViewModel: root.receiptItemsInfoViewModel
+                        consumersViewModel: root.consumersViewModel
+                        participantsViewModel: root.participantsViewModel
                     }
                 }
 

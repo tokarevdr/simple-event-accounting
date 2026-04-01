@@ -4,7 +4,8 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IEventsInfoRepository.h"
-#include "EventViewModel.h"
+#include "ViewModels/ParticipantsViewModel.h"
+#include "ViewModels/ReceiptsInfoViewModel.h"
 
 namespace Sea {
 namespace Presentation {
@@ -15,7 +16,8 @@ class EventsInfoViewModel : public QAbstractListModel
 public:
     enum Role { IdRole, TitleRole, StartDateRole, EndDateRole };
 
-    explicit EventsInfoViewModel(EventViewModel &eventViewModel,
+    explicit EventsInfoViewModel(ParticipantsViewModel &participantsViewModel,
+                                 ReceiptsInfoViewModel &receiptsInfoViewModel,
                                  Application::IEventsInfoRepository &repository,
                                  QObject *parent = nullptr);
 
@@ -39,8 +41,9 @@ public:
 
 private:
     QVector<Domain::EventInfo> m_events;
+    ParticipantsViewModel &m_participantsViewModel;
+    ReceiptsInfoViewModel &m_receiptsInfoViewModel;
     Application::IEventsInfoRepository &m_repository;
-    EventViewModel &m_eventViewModel;
 };
 
 } // namespace Presentation

@@ -4,11 +4,13 @@
 
 namespace Sea {
 namespace Presentation {
-EventsInfoViewModel::EventsInfoViewModel(EventViewModel &eventViewModel,
+EventsInfoViewModel::EventsInfoViewModel(ParticipantsViewModel &participantsViewModel,
+                                         ReceiptsInfoViewModel &receiptsInfoViewModel,
                                          Application::IEventsInfoRepository &repository,
                                          QObject *parent)
     : QAbstractListModel(parent)
-    , m_eventViewModel{eventViewModel}
+    , m_participantsViewModel{participantsViewModel}
+    , m_receiptsInfoViewModel{receiptsInfoViewModel}
     , m_repository{repository}
 {
     auto result = m_repository.readEventsInfo();
@@ -168,11 +170,13 @@ void EventsInfoViewModel::deleteEvent(int index)
 void EventsInfoViewModel::selectEvent(int index)
 {
     if (index < 0 || index >= m_events.count()) {
-        m_eventViewModel.setEventInfo(std::nullopt);
+        m_receiptsInfoViewModel.setEventId(-1);
+        m_participantsViewModel.setEventId(-1);
         return;
     }
 
-    m_eventViewModel.setEventInfo(m_events[index]);
+    m_participantsViewModel.setEventId(m_events[index].id());
+    m_receiptsInfoViewModel.setEventId(m_events[index].id());
 }
 } // namespace Presentation
 } // namespace Sea

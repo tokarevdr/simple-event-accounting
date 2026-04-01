@@ -4,11 +4,11 @@
 
 namespace Sea {
 namespace Presentation {
-ReceiptsInfoViewModel::ReceiptsInfoViewModel(ReceiptViewModel &receiptViewModel,
+ReceiptsInfoViewModel::ReceiptsInfoViewModel(ReceiptItemsInfoViewModel &receiptItemsInfoViewModel,
                                              Application::IReceiptsInfoRepository &repository,
                                              QObject *parent)
     : QAbstractListModel(parent)
-    , m_receiptViewModel{receiptViewModel}
+    , m_receiptItemsInfoViewModel{receiptItemsInfoViewModel}
     , m_repository{repository}
 {}
 
@@ -40,6 +40,8 @@ QVariant ReceiptsInfoViewModel::data(const QModelIndex &index, int role) const
             return receipt.buyer().has_value() ? receipt.buyer().value().name() : "-";
         case BuyerIdRole:
             return receipt.buyer().has_value() ? receipt.buyer().value().id() : -1;
+        case ReceiptItemsRole:
+            return QVariant::fromValue(&m_receiptItemsInfoViewModel);
         default:
             return QVariant();
     }
@@ -55,6 +57,7 @@ QHash<int, QByteArray> ReceiptsInfoViewModel::roleNames() const
     names[PurchaseTimeRole] = "purchaseTimeRole";
     names[BuyerNameRole] = "buyerNameRole";
     names[BuyerIdRole] = "buyerIdRole";
+    names[ReceiptItemsRole] = "receiptItemsRole";
 
     return names;
 }
@@ -213,11 +216,11 @@ void ReceiptsInfoViewModel::deleteReceipt(int index)
 void ReceiptsInfoViewModel::selectReceipt(int index)
 {
     if (index < 0 || index >= m_receipts.count()) {
-        m_receiptViewModel.setReceiptInfo(std::nullopt);
+        m_receiptItemsInfoViewModel.setReceiptId(-1);
         return;
     }
 
-    m_receiptViewModel.setReceiptInfo(m_receipts[index]);
+    m_receiptItemsInfoViewModel.setReceiptId(m_receipts[index].id());
 }
 } // namespace Presentation
 } // namespace Sea

@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 
 #include "Abstractions/IReceiptItemsInfoRepository.h"
-#include "ReceiptItemViewModel.h"
+#include "ViewModels/ConsumersViewModel.h"
 
 namespace Sea {
 namespace Presentation {
@@ -13,9 +13,9 @@ class ReceiptItemsInfoViewModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    enum Role { IdRole, NameRole, PriceRole, CountRole };
+    enum Role { IdRole, NameRole, PriceRole, CountRole, ConsumersRole };
 
-    explicit ReceiptItemsInfoViewModel(ReceiptItemViewModel &receiptItemViewModel,
+    explicit ReceiptItemsInfoViewModel(ConsumersViewModel &consumersViewModel,
                                        Application::IReceiptItemsInfoRepository &repository,
                                        QObject *parent = nullptr);
 
@@ -38,7 +38,7 @@ public:
 private:
     qint32 m_receiptId = -1;
     QVector<Domain::ReceiptItemInfo> m_receiptItems;
-    ReceiptItemViewModel &m_receiptItemViewModel;
+    ConsumersViewModel &m_consumersViewModel;
     Application::IReceiptItemsInfoRepository &m_repository;
 };
 

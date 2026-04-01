@@ -8,6 +8,8 @@ Item {
     id: root
 
     property var receiptItemsInfoViewModel: null
+    property var consumersViewModel: null
+    property var participantsViewModel: null
     signal receiptItemSelected
 
     ColumnLayout {
@@ -31,7 +33,7 @@ Item {
             model: receiptItemsInfoViewModel
 
             delegate: Item {
-                height: receiptItemsInfoListView.height / 10
+                height: receiptItemsInfoListView.currentIndex === index ? 460 : 40
                 width: receiptItemsInfoListView.width
 
                 MouseArea {
@@ -39,57 +41,74 @@ Item {
 
                     onClicked: {
                         receiptItemsInfoViewModel.selectReceiptItem(index)
+                        receiptItemsInfoListView.currentIndex = index
                         root.receiptItemSelected()
                     }
                 }
 
-                RowLayout {
+                ColumnLayout {
                     anchors.fill: parent
 
-                    Item {
-                        Layout.fillHeight: true
+                    RowLayout {
+                        Layout.preferredHeight: 40
+                        Layout.maximumHeight: 40
                         Layout.fillWidth: true
 
-                        Text {
-                            anchors.fill: parent
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
 
-                            text: nameRole
+                            Text {
+                                anchors.fill: parent
+
+                                text: nameRole
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+
+                            Text {
+                                anchors.fill: parent
+
+                                text: priceRole
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+
+                            Text {
+                                anchors.fill: parent
+
+                                text: countRole
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 50
+
+                            Button {
+                                anchors.fill: parent
+
+                                text: "..."
+
+                                onClicked: receiptItemMenu.open()
+                            }
                         }
                     }
 
-                    Item {
+                    ConsumersListView {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
 
-                        Text {
-                            anchors.fill: parent
+                        visible: receiptItemsInfoListView.currentIndex === index
 
-                            text: priceRole
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-
-                        Text {
-                            anchors.fill: parent
-
-                            text: countRole
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        Layout.preferredWidth: 50
-
-                        Button {
-                            anchors.fill: parent
-
-                            text: "..."
-
-                            onClicked: receiptItemMenu.open()
-                        }
+                        consumersViewModel: root.consumersViewModel
+                        participantsViewModel: root.participantsViewModel
                     }
                 }
 

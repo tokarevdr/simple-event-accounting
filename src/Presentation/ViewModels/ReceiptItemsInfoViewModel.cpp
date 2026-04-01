@@ -5,11 +5,11 @@
 namespace Sea {
 namespace Presentation {
 ReceiptItemsInfoViewModel::ReceiptItemsInfoViewModel(
-    ReceiptItemViewModel &receiptItemViewModel,
+    ConsumersViewModel &consumersViewModel,
     Application::IReceiptItemsInfoRepository &repository,
     QObject *parent)
     : QAbstractListModel(parent)
-    , m_receiptItemViewModel{receiptItemViewModel}
+    , m_consumersViewModel{consumersViewModel}
     , m_repository{repository}
 {}
 
@@ -37,6 +37,8 @@ QVariant ReceiptItemsInfoViewModel::data(const QModelIndex &index, int role) con
             return receiptItem.price();
         case CountRole:
             return receiptItem.count();
+        case ConsumersRole:
+            return QVariant::fromValue(&m_consumersViewModel);
         default:
             return QVariant();
     }
@@ -50,6 +52,7 @@ QHash<int, QByteArray> ReceiptItemsInfoViewModel::roleNames() const
     names[NameRole] = "nameRole";
     names[PriceRole] = "priceRole";
     names[CountRole] = "countRole";
+    names[ConsumersRole] = "consumersRole";
 
     return names;
 }
@@ -183,11 +186,11 @@ void ReceiptItemsInfoViewModel::deleteReceiptItem(int index)
 void ReceiptItemsInfoViewModel::selectReceiptItem(int index)
 {
     if (index < 0 || index > m_receiptItems.count()) {
-        m_receiptItemViewModel.setReceiptItemInfo(std::nullopt);
+        m_consumersViewModel.setReceiptItemId(-1);
         return;
     }
 
-    m_receiptItemViewModel.setReceiptItemInfo(m_receiptItems[index]);
+    m_consumersViewModel.setReceiptItemId(m_receiptItems[index].id());
 }
 } // namespace Presentation
 } // namespace Sea

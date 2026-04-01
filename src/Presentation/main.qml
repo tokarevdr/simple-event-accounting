@@ -8,89 +8,49 @@ import "Views/Controls"
 
 ApplicationWindow {
        id: window
-       width: 600
+       width: 1000
        height: 800
        visible: true
        title: qsTr("Hello World")
-
-       NavigationController {
-              id: navigationController
-       }
 
        RowLayout {
               anchors.fill: parent
 
               ColumnLayout {
-                     id: sideBar
-                     Layout.fillHeight: true
-                     Layout.preferredWidth: 50
-                     Layout.maximumWidth: 50
-
-                     property int currentIndex: 0
-                     spacing: 0
-
-                     Button {
-                            Layout.preferredHeight: 50
-                            Layout.fillWidth: true
-                            text: "С"
-
-                            checked: sideBar.currentIndex === 0
-
-                            onClicked: sideBar.currentIndex = 0
-                     }
-
-                     Button {
-                            Layout.preferredHeight: 50
-                            Layout.fillWidth: true
-                            text: "Л"
-
-                            checked: sideBar.currentIndex === 1
-
-                            onClicked: sideBar.currentIndex = 1
-                     }
-
-                     Item {
-                            Layout.fillHeight: true
-                     }
-              }
-
-              StackLayout {
                      Layout.fillHeight: true
                      Layout.fillWidth: true
 
-                     currentIndex: sideBar.currentIndex
+                     EventsInfoListView {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
 
-                     Item {
-                            StackLayout {
-                                   id: stackLayout
-                                   anchors.fill: parent
-                                   currentIndex: navigationController.currentView
-
-                                   EventsInfoListView {
-                                          eventsInfoViewModel: eventsInfoVm
-                                          onEventSelected: navigationController.currentView = NavigationController.Event
-                                   }
-
-                                   EventView {
-                                          eventViewModel: eventVm
-                                          navController: navigationController
-                                   }
-
-                                   ReceiptView {
-                                          receiptViewModel : receiptVm
-                                          navController: navigationController
-                                   }
-
-                                   ReceiptItemView {
-                                          consumersViewModel: consumersVm
-                                          navController: navigationController
-                                   }
-                            }
+                            eventsInfoViewModel: eventsInfoVm
                      }
 
                      UsersListView {
+                            Layout.fillHeight: true
+                            Layout.fillWidth: true
+
                             usersViewModel: usersVm
                      }
+              }
+
+
+              ReceiptsInfoListView {
+                     Layout.fillHeight: true
+                     Layout.fillWidth: true
+
+                     receiptsInfoViewModel: receiptsInfoVm
+                     participantsViewModel: participantsVm
+                     receiptItemsInfoViewModel: receiptItemsInfoVm
+                     consumersViewModel: consumersVm
+              }
+
+              ParticipantsListView {
+                     Layout.fillHeight: true
+                     Layout.fillWidth: true
+
+                     participantsViewModel: participantsVm
               }
        }
 }

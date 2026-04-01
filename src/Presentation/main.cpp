@@ -24,14 +24,12 @@ int main(
     Sea::Infrastructure::SqliteAccountingRepository repo;
 
     Sea::Presentation::ConsumersViewModel consumersViewModel(repo);
-    Sea::Presentation::ReceiptItemViewModel receiptItemViewModel(consumersViewModel);
-    Sea::Presentation::ReceiptItemsInfoViewModel receiptItemsInfoViewModel(receiptItemViewModel,
-                                                                           repo);
-    Sea::Presentation::ReceiptViewModel receiptViewModel(receiptItemsInfoViewModel);
-    Sea::Presentation::ReceiptsInfoViewModel receiptsInfoViewModel(receiptViewModel, repo);
+    Sea::Presentation::ReceiptItemsInfoViewModel receiptItemsInfoViewModel(consumersViewModel, repo);
+    Sea::Presentation::ReceiptsInfoViewModel receiptsInfoViewModel(receiptItemsInfoViewModel, repo);
     Sea::Presentation::ParticipantsViewModel participantsViewModel(repo);
-    Sea::Presentation::EventViewModel eventViewModel(participantsViewModel, receiptsInfoViewModel);
-    Sea::Presentation::EventsInfoViewModel eventsInfoViewModel(eventViewModel, repo);
+    Sea::Presentation::EventsInfoViewModel eventsInfoViewModel(participantsViewModel,
+                                                               receiptsInfoViewModel,
+                                                               repo);
     Sea::Presentation::UsersViewModel usersViewModel(repo);
 
     QSortFilterProxyModel usersProxyViewModel;
@@ -51,13 +49,10 @@ int main(
     engine.rootContext()->setContextProperty("eventsInfoVm", &eventsInfoViewModel);
     engine.rootContext()->setContextProperty("usersVm", &usersViewModel);
     engine.rootContext()->setContextProperty("usersProxyVm", &usersProxyViewModel);
-    engine.rootContext()->setContextProperty("eventVm", &eventViewModel);
     engine.rootContext()->setContextProperty("participantsVm", &participantsViewModel);
     engine.rootContext()->setContextProperty("participantsProxyVm", &participantsProxyViewModel);
     engine.rootContext()->setContextProperty("receiptsInfoVm", &receiptsInfoViewModel);
-    engine.rootContext()->setContextProperty("receiptVm", &receiptViewModel);
     engine.rootContext()->setContextProperty("receiptItemsInfoVm", &receiptItemsInfoViewModel);
-    engine.rootContext()->setContextProperty("receiptItemVm", &receiptItemViewModel);
     engine.rootContext()->setContextProperty("consumersVm", &consumersViewModel);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
