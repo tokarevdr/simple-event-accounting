@@ -6,6 +6,7 @@
 #include "Abstractions/IConsumersRepository.h"
 #include "Abstractions/IEventUsersRepository.h"
 #include "Abstractions/IEventsInfoRepository.h"
+#include "Abstractions/IEventsRepository.h"
 #include "Abstractions/IReceiptItemsInfoRepository.h"
 #include "Abstractions/IReceiptsInfoRepository.h"
 #include "Abstractions/IUsersRepository.h"
@@ -17,6 +18,7 @@ class INFRASTRUCTURE_EXPORT SqliteAccountingRepository
     : public Application::IEventsInfoRepository,
       public Application::IUsersRepository,
       public Application::IEventUsersRepository,
+      public Application::IEventsRepository,
       public Application::IReceiptsInfoRepository,
       public Application::IReceiptItemsInfoRepository,
       public Application::IConsumersRepository
@@ -29,6 +31,9 @@ public:
     Utils::Result<QVector<Domain::EventInfo>, QString> readEventsInfo() override;
     Utils::Result<Utils::Unit, QString> updateEventInfo(const Domain::EventInfo &eventInfo) override;
     Utils::Result<Utils::Unit, QString> deleteEvent(qint32 id) override;
+
+    // IEventsRepository interface
+    Utils::Result<Domain::Event, QString> readEvent(qint32 eventId) override;
 
     // IParticipantsRepository interface
     Utils::Result<qint32, QString> createUser(const Domain::User &user) override;
@@ -64,7 +69,6 @@ public:
 private:
     QSqlDatabase m_db;
 };
-
 } // namespace Infrastructure
 } // namespace Sea
 

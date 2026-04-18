@@ -16,6 +16,7 @@ SOURCES += \
     Abstractions/IConsumersRepository.cpp \
     Abstractions/IEventUsersRepository.cpp \
     Abstractions/IEventsInfoRepository.cpp \
+    Abstractions/IEventsRepository.cpp \
     Abstractions/IReceiptItemsInfoRepository.cpp \
     Abstractions/IReceiptsInfoRepository.cpp \
     Abstractions/IUsersRepository.cpp
@@ -24,6 +25,7 @@ HEADERS += \
     Abstractions/IConsumersRepository.h \
     Abstractions/IEventUsersRepository.h \
     Abstractions/IEventsInfoRepository.h \
+    Abstractions/IEventsRepository.h \
     Abstractions/IReceiptItemsInfoRepository.h \
     Abstractions/IReceiptsInfoRepository.h \
     Abstractions/IUsersRepository.h \

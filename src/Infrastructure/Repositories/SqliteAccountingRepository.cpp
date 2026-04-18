@@ -1,10 +1,13 @@
 #include "SqliteAccountingRepository.h"
 
 #include <QDebug>
+#include <QHash>
 #include <QMutexLocker>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>
+
+#include <QSqlRecord>
 
 namespace Sea {
 namespace Infrastructure {
@@ -210,6 +213,45 @@ Utils::Result<Utils::Unit, QString> SqliteAccountingRepository::deleteEvent(qint
     }
 
     return Utils::Unit();
+}
+
+Utils::Result<Domain::Event, QString> SqliteAccountingRepository::readEvent(qint32 eventId)
+{
+    QSqlQuery query(m_db);
+    Domain::Event event;
+
+    QString queryStr = QString(
+        R"(SELECT e.*, evus.*, r.*, ru.*, ri.*, riu.*, recitus.*
+           FROM events as e
+           LEFT JOIN events_users eu ON e.event_id = eu.event_id
+           LEFT JOIN users evus ON eu.user_id = evus.user_id
+           LEFT JOIN receipts r ON e.event_id = r.event_id
+           LEFT JOIN users ru ON r.user_id = ru.user_id
+           LEFT JOIN receipt_items ri ON r.receipt_id = ri.receipt_id
+           LEFT JOIN receipt_items_users riu ON ri.receipt_item_id = riu.receipt_item_id
+           LEFT JOIN users recitus ON riu.user_id = recitus.user_id
+           WHERE e.event_id = :event_id)");
+
+    if (!query.prepare(queryStr)) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить событие.");
+    }
+
+    query.bindValue(":event_id", eventId);
+
+    if (!query.exec()) {
+        qDebug() << Q_FUNC_INFO << query.lastError().text();
+        return QString("Не удалось получить событие.");
+    }
+
+    QHash<qint32, Domain::Receipt> receipts;
+    QHash<qint32, Domain::User> eventUsers;
+
+    while (query.next()) {
+        qDebug() << query.record();
+    }
+
+    return event;
 }
 
 Utils::Result<qint32, QString> SqliteAccountingRepository::createUser(const Domain::User &user)

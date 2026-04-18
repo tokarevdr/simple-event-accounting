@@ -33,7 +33,7 @@ Item {
             model: receiptItemsInfoViewModel
 
             delegate: Item {
-                height: receiptItemsInfoListView.currentIndex === index ? 460 : 40
+                height: receiptItemsInfoListView.currentIndex === index ? 200 : 40
                 width: receiptItemsInfoListView.width
 
                 MouseArea {
@@ -104,6 +104,7 @@ Item {
                     ConsumersListView {
                         Layout.fillHeight: true
                         Layout.fillWidth: true
+                        Layout.leftMargin: 25
 
                         visible: receiptItemsInfoListView.currentIndex === index
 
