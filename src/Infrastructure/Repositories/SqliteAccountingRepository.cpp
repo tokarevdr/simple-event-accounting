@@ -220,20 +220,18 @@ Utils::Result<Domain::Event, QString> SqliteAccountingRepository::readEvent(qint
     QSqlQuery query(m_db);
     Domain::Event event;
 
+    if (!m_db.transaction()) {
+        qDebug() << Q_FUNC_INFO << m_db.lastError().text();
+        return QString("Не удалось начать транзакцию.");
+    }
+
     QString queryStr = QString(
-        R"(SELECT e.*, evus.*, r.*, ru.*, ri.*, riu.*, recitus.*
-           FROM events as e
-           LEFT JOIN events_users eu ON e.event_id = eu.event_id
-           LEFT JOIN users evus ON eu.user_id = evus.user_id
-           LEFT JOIN receipts r ON e.event_id = r.event_id
-           LEFT JOIN users ru ON r.user_id = ru.user_id
-           LEFT JOIN receipt_items ri ON r.receipt_id = ri.receipt_id
-           LEFT JOIN receipt_items_users riu ON ri.receipt_item_id = riu.receipt_item_id
-           LEFT JOIN users recitus ON riu.user_id = recitus.user_id
-           WHERE e.event_id = :event_id)");
+        R"(SELECT * FROM events
+           WHERE event_id = :event_id)");
 
     if (!query.prepare(queryStr)) {
         qDebug() << Q_FUNC_INFO << query.lastError().text();
+        m_db.rollback();
         return QString("Не удалось получить событие.");
     }
 
@@ -241,14 +239,168 @@ Utils::Result<Domain::Event, QString> SqliteAccountingRepository::readEvent(qint
 
     if (!query.exec()) {
         qDebug() << Q_FUNC_INFO << query.lastError().text();
+        m_db.rollback();
         return QString("Не удалось получить событие.");
     }
 
-    QHash<qint32, Domain::Receipt> receipts;
-    QHash<qint32, Domain::User> eventUsers;
-
     while (query.next()) {
-        qDebug() << query.record();
+        Domain::EventInfo eventInfo;
+        eventInfo.setId(query.value(0).toInt());
+        eventInfo.setTitle(query.value(1).toString());
+        eventInfo.setStartDate(QDate::fromJulianDay(query.value(2).toInt()));
+        eventInfo.setEndDate(QDate::fromJulianDay(query.value(3).toInt()));
+
+        event.setInfo(eventInfo);
+
+        queryStr = QString(R"(SELECT u.* FROM events_users AS eu
+                              LEFT JOIN users AS u ON eu.user_id = u.user_id
+                              WHERE event_id = :event_id)");
+
+        if (!query.prepare(queryStr)) {
+            qDebug() << Q_FUNC_INFO << query.lastError().text();
+            m_db.rollback();
+            return QString("Не удалось получить участников события.");
+        }
+
+        query.bindValue(":event_id", eventId);
+
+        if (!query.exec()) {
+            qDebug() << Q_FUNC_INFO << query.lastError().text();
+            m_db.rollback();
+            return QString("Не удалось получить участников события.");
+        }
+
+        QVector<Domain::User> eventUsers;
+        while (query.next()) {
+            Domain::User user;
+            user.setId(query.value(0).toInt());
+            user.setName(query.value(1).toString());
+
+            eventUsers.append(user);
+        }
+
+        event.setParticipants(eventUsers);
+
+        queryStr = QString(
+            R"(SELECT r.*, u.*
+           FROM receipts as r
+           LEFT JOIN users AS u ON r.user_id = u.user_id
+           WHERE r.event_id = :event_id)");
+
+        if (!query.prepare(queryStr)) {
+            qDebug() << Q_FUNC_INFO << query.lastError().text();
+            m_db.rollback();
+            return QString("Не удалось список чеков.");
+        }
+
+        query.bindValue(":event_id", eventId);
+
+        if (!query.exec()) {
+            qDebug() << Q_FUNC_INFO << query.lastError().text();
+            m_db.rollback();
+            return QString("Не удалось получить список чеков.");
+        }
+
+        QVector<Domain::Receipt> receipts;
+        while (query.next()) {
+            Domain::Receipt receipt;
+            Domain::ReceiptInfo receiptInfo;
+            receiptInfo.setId(query.value(0).toInt());
+            receiptInfo.setEventId(query.value(1).toInt());
+            receiptInfo.setTitle(query.value(2).toString());
+            receiptInfo.setPurchaseDateTime(
+                QDateTime::fromSecsSinceEpoch(query.value(3).toLongLong()));
+
+            if (query.value(4).isValid()) {
+                Domain::User user;
+                user.setId(query.value(4).toInt());
+                user.setName(query.value(5).toString());
+                receiptInfo.setBuyer(user);
+            } else {
+                receiptInfo.setBuyer(std::nullopt);
+            }
+
+            receipt.setInfo(receiptInfo);
+
+            receipts.append(receipt);
+        }
+
+        for (auto &receipt : receipts) {
+            queryStr = QString(R"(SELECT ri.*
+                              FROM receipt_items as ri
+                              WHERE ri.receipt_id = :receipt_id)");
+
+            if (!query.prepare(queryStr)) {
+                qDebug() << Q_FUNC_INFO << query.lastError().text();
+                m_db.rollback();
+                return QString("Не удалось получить список записей в чеке.");
+            }
+
+            query.bindValue(":receipt_id", receipt.info().id());
+
+            if (!query.exec()) {
+                qDebug() << Q_FUNC_INFO << query.lastError().text();
+                m_db.rollback();
+                return QString("Не удалось получить записей в чеке.");
+            }
+
+            QVector<Domain::ReceiptItem> receiptItems;
+            while (query.next()) {
+                Domain::ReceiptItem receiptItem;
+                Domain::ReceiptItemInfo receiptItemInfo;
+                receiptItemInfo.setId(query.value(0).toInt());
+                receiptItemInfo.setReceiptId(query.value(1).toInt());
+                receiptItemInfo.setName(query.value(2).toString());
+                receiptItemInfo.setPrice(query.value(3).toInt());
+                receiptItemInfo.setCount(query.value(4).toInt());
+
+                receiptItem.setInfo(receiptItemInfo);
+
+                receiptItems.append(receiptItem);
+            }
+
+            for (auto &receiptItem : receiptItems) {
+                queryStr = QString(R"(SELECT u.name, riu.*
+                                  FROM users AS u
+                                  LEFT JOIN receipt_items_users AS riu ON u.user_id = riu.user_id
+                                  WHERE riu.receipt_item_id = :receipt_item_id)");
+
+                if (!query.prepare(queryStr)) {
+                    qDebug() << Q_FUNC_INFO << query.lastError().text();
+                    m_db.rollback();
+                    return QString("Не удалось получить потребителей.");
+                }
+
+                query.bindValue(":receipt_item_id", receiptItem.info().id());
+
+                if (!query.exec()) {
+                    qDebug() << Q_FUNC_INFO << query.lastError().text();
+                    m_db.rollback();
+                    return QString("Не удалось получить потребителей.");
+                }
+
+                QVector<Domain::Consumer> consumers;
+                while (query.next()) {
+                    Domain::Consumer consumer;
+                    consumer.setName(query.value(0).toString());
+                    consumer.setReceiptItemId(query.value(1).toInt());
+                    consumer.setParticipantId(query.value(2).toInt());
+                    consumer.setConsumptionRatio(query.value(3).toInt());
+                    consumers.append(consumer);
+                }
+
+                receiptItem.setConsumers(consumers);
+            }
+
+            receipt.setItems(receiptItems);
+        }
+
+        event.setReceipts(receipts);
+
+        if (!m_db.commit()) {
+            qDebug() << Q_FUNC_INFO << m_db.lastError().text();
+            return QString("Не удалось завершить транзакцию.");
+        }
     }
 
     return event;

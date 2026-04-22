@@ -42,8 +42,6 @@ int main(
     participantsProxyViewModel.setFilterRole(Sea::Presentation::UsersViewModel::NameRole);
     participantsProxyViewModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    repo.readEvent(2);
-
     QQuickStyle::setStyle("Fusion");
 
     QQmlApplicationEngine engine;
